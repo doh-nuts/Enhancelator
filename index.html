@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Enhancelator</title>
+	<link rel="icon" type="image/svg" href="holy_enhancer.svg"/>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<script type="text/javascript" src="jquery-3.7.1.min.js"></script>
+  <script>
+      $(function(){
+      $("#includedContent").load("items.svg"); 
+    });
+  </script>
+</head>
+<body background="milkyBackground.svg">
+	<div id="enhance_area" class="enhance_area">
+    <div class="input_block">
+      <div class="enhancer_stats">
+        <table>
+          <thead>
+            <tr>
+              <th colspan="3">Enhancer Traits</th>
+            </tr>
+          </thead>
+          <tr>
+            <td><p>Level</p></td>
+            <td></td>
+            <td align="right"><input id="i_enhancing_level" type="number" min="1" max="200" placeholder="100"></td>
+          </tr>
+          <tr>
+            <td><p>Laboratory</p></td>
+            <td></td>
+            <td align="right"><input id="i_laboratory_level" type="number" min="0" max="8" placeholder="0"></td>
+          </tr>
+          <tr><td colspan="3"><div class="top_divider"></div></td></tr>
+          <tr>
+            <td><p>Enchanted</p></td>
+            <td align="center"><input id="i_use_enchanted" type="checkbox" class="enhancer_stats_check_box"></td>
+            <td align="right"><input id="i_enchanted_level" type="number" min="0" max="20" placeholder="0"></td>
+          </tr>
+          <tr><td colspan="3"><div class="top_divider"></div></td></tr>
+          <tr>
+            <td><p>Enhancer</p></td>
+            <td></td>
+            <td align="right"><input id="i_enhancer_level" type="number" min="0" max="20" placeholder="0"></td>
+          </tr>
+          <tr>
+            <td colspan="3">
+              <button id="btn_cheese_enhancer" class="btn_icon" onclick="enhancer_selection(this)">
+                <svg><use xlink:href="#cheese_enhancer"></use></svg>
+              </button>
+              <button id="btn_verdant_enhancer" class="btn_icon" onclick="enhancer_selection(this)">
+                <svg><use xlink:href="#verdant_enhancer"></use></svg>
+              </button>
+              <button id="btn_azure_enhancer" class="btn_icon" onclick="enhancer_selection(this)">
+                <svg><use xlink:href="#azure_enhancer"></use></svg>
+              </button>
+              <button id="btn_burble_enhancer" class="btn_icon" onclick="enhancer_selection(this)">
+                <svg><use xlink:href="#burble_enhancer"></use></svg>
+              </button>
+              <button id="btn_crimson_enhancer" class="btn_icon" onclick="enhancer_selection(this)">
+                <svg><use xlink:href="#crimson_enhancer"></use></svg>
+              </button>
+              <button id="btn_rainbow_enhancer" class="btn_icon" onclick="enhancer_selection(this)">
+                <svg><use xlink:href="#rainbow_enhancer"></use></svg>
+              </button>
+              <button id="btn_holy_enhancer" class="btn_icon" onclick="enhancer_selection(this)">
+                <svg><use xlink:href="#holy_enhancer"></use></svg>
+              </button>
+            </td>
+          </tr>
+          <tr><td colspan="3"><div class="top_divider"></div></td></tr>
+          <tr>
+            <td colspan="3">
+              <button id="tea_enhancing" class="btn_icon" style="width:48px; height:48px;" onclick="tea_selection(this)">
+                <svg><use xlink:href="#enhancing_tea"></use></svg>
+              </button>
+              <button id="tea_super_enhancing" class="btn_icon" style="width:48px; height:48px;" onclick="tea_selection(this)">
+                <svg><use xlink:href="#super_enhancing_tea"></use></svg>
+              </button>
+              <button id="tea_blessed" class="btn_icon" style="width:48px; height:48px;" onclick="tea_selection(this)">
+                <svg><use xlink:href="#blessed_tea"></use></svg>
+              </button>
+              <button id="tea_wisdom" class="btn_icon" style="width:48px; height:48px;" onclick="tea_selection(this)">
+                <svg><use xlink:href="#wisdom_tea"></use></svg>
+              </button>
+            </td>
+          </tr>
+          <tr><td colspan="3"><div class="top_divider"></div></td></tr>
+          <tr>
+            <td colspan="2"><p>Hourly Rate:</p></td>
+            <td align="right"><input id="i_hourly_rate" type="number" min="0" max="100000000" placeholder="3000000"></td>
+          </tr>
+          <tr>
+            <td colspan="2"><p>% Rate:</p></td>
+            <td align="right"><input id="i_percent_rate" type="number" min="0" max="20" placeholder="2"></td>
+          </tr>
+        </table>
+      </div>
+      <div id="item_slot" class="item_slot">
+        <div class="item_slot_icon">
+          <svg><use xlink:href="#"></use></svg>
+        </div>
+        <div id="sel_item_container" class="sel_item_container">
+          <p class="sel_item_text">Select item</p>
+          <div class="close btn" onclick="$('#sel_item_container').css('display','none')"><p>&#10005;</p></div>
+          <input id="item_filter" type="text" class="sel_item_filter" placeholder="Item Filter">
+          <div id="sel_item" class="sel_item_icons"></div>
+        </div>
+      </div>
+      <div id="item_stats" class="item_stats">
+        <div id="material_stats">
+          <table>
+            <thead>
+              <tr>
+                <th style="padding: 0px 5px 0px 2px">Item</th>
+                <th style="padding: 0px 5px 0px 2px">Count</th>
+                <th style="padding: 0px 5px 0px 2px">Price</th>
+              </tr>
+            </thead>
+            <tbody style="display: table-header-group">
+              <tr id="mat_1_cell">
+                <td id="mat_1_icon" class="mat_icon">
+                  <svg><use xlink:href="#"></use></svg>
+                </td>
+                <td><p id="i_mat_1" align="right" style="padding: 0px 5px 0px 2px"></p></td>
+                <td><input id="i_prc_1" type="number" min="0" max="100000000" value="0" placeholder="400"></td>
+              </tr>
+              <tr id="mat_2_cell">
+                <td id="mat_2_icon" class="mat_icon">
+                  <svg><use xlink:href="#"></use></svg>
+                </td>
+                <td><p id="i_mat_2" align="right" style="padding: 0px 5px 0px 2px"></p></td>
+                <td><input id="i_prc_2" type="number" min="0" max="100000000" value="0" placeholder="400"></td>
+              </tr>
+              <tr id="mat_3_cell">
+                <td id="mat_3_icon" class="mat_icon">
+                  <svg><use xlink:href="#"></use></svg>
+                </td>
+                <td><p id="i_mat_3"align="right" style="padding: 0px 5px 0px 2px"></p></td>
+                <td><input id="i_prc_3" type="number" min="0" max="100000000" value="0" placeholder="400"></td>
+              </tr>
+              <tr id="mat_4_cell">
+                <td id="mat_4_icon" class="mat_icon">
+                  <svg><use xlink:href="#"></use></svg>
+                </td>
+                <td><p id="i_mat_4" align="right" style="padding: 0px 5px 0px 2px"></p></td>
+                <td><input id="i_prc_4" type="number" min="0" max="100000000" value="0" placeholder="400"></td>
+              </tr>
+              <tr id="mat_5_cell">
+                <td id="mat_5_icon" class="mat_icon">
+                  <svg><use xlink:href="#"></use></svg>
+                </td>
+                <td><p id="i_mat_5" align="right" style="padding: 0px 5px 0px 2px"></p></td>
+                <td><input id="i_prc_5" type="number" min="0" max="100000000" value="0" placeholder="400"></td>
+              </tr>
+              <tr>
+                <td id="coin_icon" class="mat_icon">
+                  <svg><use xlink:href="#coin"></use></svg>
+                </td>
+                <td><p align="right" style="padding: 0px 5px 0px 2px" id="i_coins"></p></td>
+                <td></td>
+              </tr>
+              <tr><td colspan="3"><div class="top_divider"></div></td></tr>
+              <tr>
+                <td colspan="2" class="protect_icons">
+                  <div id="prot_1_icon" class="mat_icon" class="btn_icon" onclick="protect_selection(this)">
+                    <svg><use xlink:href="#mirror_of_protection"></use></svg>
+                  </div>
+                  <div id="prot_2_icon" class="mat_icon" class="btn_icon" onclick="protect_selection(this)">
+                    <svg><use xlink:href="#coin"></use></svg>
+                  </div>
+                  <div id="prot_3_icon" class="mat_icon" class="btn_icon" onclick="protect_selection(this)">
+                    <svg><use xlink:href="#coin"></use></svg>
+                  </div>
+                  <div id="prot_4_icon" class="mat_icon" class="btn_icon" onclick="protect_selection(this)">
+                    <svg><use xlink:href="#coin"></use></svg>
+                  </div>
+                  <div id="prot_5_icon" class="mat_icon" class="btn_icon" onclick="protect_selection(this)">
+                    <svg><use xlink:href="#coin"></use></svg>
+                  </div>
+                </td>
+                <td><input type="number" min="0" max="100000000" value="0" id="i_protect_price" placeholder="400"></td>
+              </tr>
+              <tr>
+                <td colspan="2" class="protect_icons">
+                  <div id="base_icon" class="mat_icon">
+                    <svg><use xlink:href="#"></use></svg>
+                  </div>
+                </td>
+                <td><input id="i_base_price" type="number" min="0" max="100000000" value="0" placeholder="400"></td>
+              </tr>
+              <tr><td colspan="3"><div class="top_divider"></div></td></tr>
+              <tr>
+                <td colspan="2"><p>Target:</p></td>
+                <td><input id="i_stop_at" type="number" min="1" max="20" value="10" placeholder="10"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+		<div class="result">
+      <table id="myTable" class="results_table">
+        <thead>
+          <tr>
+            <th class="results_header_cells">Prot</th>
+            <th class="results_header_cells">Actions</th>
+            <th class="results_header_cells">Time</th>
+            <th class="results_header_cells">Exp</th>
+            <th class="results_header_cells">Exp/h</th>
+            <th class="results_header_cells">G/E</th>
+            <th class="results_header_icon_cell" id="r_mat_1_icon"><svg><use xlink:href="#"></use></svg></th>
+            <th class="results_header_icon_cell" id="r_mat_2_icon"><svg><use xlink:href="#"></use></svg></th>
+            <th class="results_header_icon_cell" id="r_mat_3_icon"><svg><use xlink:href="#"></use></svg></th>
+            <th class="results_header_icon_cell" id="r_mat_4_icon"><svg><use xlink:href="#"></use></svg></th>
+            <th class="results_header_icon_cell" id="r_mat_5_icon"><svg><use xlink:href="#"></use></svg></th>
+            <th class="results_header_icon_cell" ><svg><use xlink:href="#coin"></use></svg></th>
+            <th class="results_header_cells">Protects</th>
+            <th class="results_header_cells">Mat Cost</th>
+            <th class="results_header_cells">Total Cost</th>
+          </tr>
+        </thead>
+        <tbody id="results_table_body" style="display: table-header-group">
+        </tbody>
+      </table>
+	  </div>
+  </div>
+  <div>
+    <p>Made by: dohnuts, MangoFlavor</p>
+  </div>
+  
+  <div hidden id="includedContent"></div>
+
+  <script type="text/javascript" src="math.js"></script>
+	<script type="text/javascript" src="items_data.js"></script>
+	<script type="text/javascript" src="main.js"></script>
+	<script type="text/javascript" src="enhance_worker.js"></script>
+</body>
+</html>
