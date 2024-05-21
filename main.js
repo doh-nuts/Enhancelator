@@ -76,13 +76,113 @@ results = {
   exp: 0,
   proto_count: 0,
 },
-materials = [],
-tea_slot = "",
-tea_pos = 0,
 temp = 0;
 game_data = null;
 price_data = null;
-enhancable_items = null;
+enhancable_items = null,
+
+success_rate = [
+  50, //+1
+  45, //+2
+  45, //+3
+  40, //+4
+  40, //+5
+  40, //+6
+  35, //+7
+  35, //+8
+  35, //+9
+  35, //+10
+  30, //+11
+  30, //+12
+  30, //+13
+  30, //+14
+  30, //+15
+  30, //+16
+  30, //+17
+  30, //+18
+  30, //+19
+  30 //+20
+];
+
+function cal_exp(item_level, enhance_level) {
+  return 1.4*(1+enhance_level)*(10+item_level)
+}
+
+function Enhancelate(save_data, sim_data)
+{
+  let markov = math.zeros(20,20);
+  const success_chances = success_rate.map((a) => a / 100.0 * sim_data.total_bonus);
+
+  for(let i = 0; i < save_data.stop_at; i++)
+  {
+    const success_chance = (success_rate[i] / 100.0) * sim_data.total_bonus;
+    const destination = i >= sim_data.protect_at ? i - 1 : 0;
+    if(save_data.tea_blessed)
+    {
+      markov.set([i, i+2], success_chance * 0.01);
+      markov.set([i, i+1], success_chance * 0.99);
+      markov.set([i, destination], 1 - success_chance);
+    }
+    else
+    {
+      markov.set([i, i+1], success_chance);
+      markov.set([i, destination], 1.0 - success_chance);
+    }
+  }
+  markov.set([save_data.stop_at, save_data.stop_at], 1.0);
+
+  
+  let Q = markov.subset(math.index(math.range(0, save_data.stop_at), math.range(0, save_data.stop_at)));
+  const M = math.inv(math.subtract(math.identity(save_data.stop_at), Q));
+  const attemptsArray = M.subset(math.index(math.range(0, 1), math.range(0, save_data.stop_at)));
+  const attempts = math.flatten(math.row(attemptsArray, 0).valueOf()).reduce((a, b) => a + b, 0);
+  const protectAttempts = M.subset(math.index(math.range(0, 1), math.range(sim_data.protect_at, save_data.stop_at)));
+  const protectAttemptsArray = (typeof protectAttempts === 'number') ?
+     [protectAttempts] :
+     math.flatten(math.row(protectAttempts, 0).valueOf());
+  const protects = protectAttemptsArray.map((a, i) => a * markov.get([i + sim_data.protect_at, i + sim_data.protect_at - 1])).reduce((a, b) => a + b, 0);
+  const exp = math.flatten(math.row(attemptsArray, 0).valueOf()).reduce((acc, a, i) => {
+    return acc + (a * success_chances[i] + a * 0.1 * (1 - success_chances[i])) * (save_data.tea_wisdom ? 1.12 : 1.00) * (cal_exp(sim_data.item_level, i));
+  }, 0);
+  
+  results = {};
+  results.actions = attempts
+  results.exp = exp;
+  results.protect_count = protects;
+
+  return results;
+}
+
+function get_full_item_price(hrid) {
+  final_cost = 0;
+  let is_base_item = true;
+
+  // find action to make this
+  if(game_data.itemDetailMap[hrid].categoryHrid == "/item_categories/equipment")
+  {
+    const action = Object.values(game_data.actionDetailMap).find((a) => a.function == "/action_functions/production" && a.outputItems[0].itemHrid == hrid);
+    is_base_item = (action == null);
+    if(!is_base_item)
+    {
+      action.inputItems.forEach((item) => {
+        final_cost += item.count * get_full_item_price(item.itemHrid);
+      });
+      if(action.upgradeItemHrid != "")
+      {
+        final_cost += get_full_item_price(action.upgradeItemHrid);
+      }
+    }
+  }
+
+  if(is_base_item)
+  {
+    const fullName = game_data.itemDetailMap[hrid].name;
+    const item_price_data = price_data.market[fullName];
+    final_cost = (item_price_data.ask + item_price_data.bid) / 2.0;
+  }
+
+  return final_cost;
+}
 
 //tims as seconds, return string "00h:00m:00s"
 function formatTime(seconds) {
@@ -97,7 +197,6 @@ function formatTime(seconds) {
 // Update enhancer traits that built off of given inputs
 function update_values() {
   // Enhancer bonus
-  console.log(save_data, sim_data);
   key = "/items/" + save_data.selected_enhancer.substring(4);
 	save_data.enhancer_level = Number($("#i_enhancer_level").val())
 	temp = enhancable_items.find((a) => a.hrid == key).equipmentDetail.noncombatStats.enhancingSuccess * 100 * enhance_bonus[save_data.enhancer_level]
@@ -144,7 +243,6 @@ function validate_field(id, key, value, min, max) {
   if(key in save_data) { save_data[key] = value; }
   if(key in sim_data)  { sim_data [key] = value; }
 
-  console.log(id, key, value, save_data);
 	update_values()
 }
 
@@ -162,7 +260,6 @@ function reset() {
 	}
 	$("#iterations").text("0")
 	$("#i_coins").val("0")
-	materials = []
 	close_sel_menus()
 	update_values()
 }
@@ -208,7 +305,6 @@ function reset_results() {
     result = all_results[protect_at - 2];
     
     var newRow = tbodyRef.insertRow();
-    //console.log(all_results[protect_at-2].mat_cost, min_mat_cost);
     if(result.mat_cost == min_mat_cost) { newRow.style.backgroundColor = "#223355"; }
     if(result.ttl_cost == min_ttl_cost) { newRow.style.backgroundColor = "#224422"; }
     var newText = null;
@@ -285,7 +381,6 @@ function change_item(value, key) {
   sim_data.mat_1 = sim_data.mat_2 = sim_data.mat_3 = sim_data.mat_4 = sim_data.mat_5 = 0;
   sim_data.prc_1 = sim_data.prc_2 = sim_data.prc_3 = sim_data.prc_4 = sim_data.prc_5 = 0;
 
-	materials = []
   const item = enhancable_items.find((a) => a.hrid == key);
 	for(i = 0; i < item.enhancementCosts.length; i++) {
 		elm = item.enhancementCosts[i]
@@ -294,7 +389,6 @@ function change_item(value, key) {
 			sim_data.coins = elm.count
 		}
 		else {
-			materials.push(elm.itemHrid)
 			$("#mat_"+(i+1)+"_cell").toggle();
 			$("#r_mat_"+(i+1)+"_cell").toggle();
 			$("#mat_"+(i+1)+"_icon > svg > use").attr("xlink:href", "#"+elm.itemHrid.substring(7))
@@ -383,7 +477,7 @@ function init_user_data() {
     $("#i_stop_at").val(save_data.stop_at);
 
     if($("#i_hourly_rate").attr("placeholder") != save_data.hourly_rate) { $("#i_hourly_rate").val(save_data.hourly_rate); }
-    if($("#i_precent_rate").attr("placeholder") != save_data.precent_rate) { $("#i_precent_rate").val(save_data.precent_rate); }
+    if($("#i_percent_rate").attr("placeholder") != save_data.percent_rate) { $("#i_percent_rate").val(save_data.percent_rate); }
 
     i_stop_at.addEventListener('focus', () => i_stop_at.select());
 	}
@@ -402,8 +496,6 @@ function enhancer_selection(element)
 {
   $("#" + save_data.selected_enhancer).attr("class", "btn_icon");
   save_data.selected_enhancer = element.id;
-  console.log("clickey enhancery!");
-  console.log(element);
   element.className = 'btn_icon_selected';
 
   update_values();
@@ -448,14 +540,11 @@ $(document).ready(function() {
   const pricesRequest = new XMLHttpRequest();
   pricesRequest.open("GET", "https://holychikenz.github.io/MWIApi/milkyapi.json", false);
   pricesRequest.send(null);
-  console.log(pricesRequest);
   price_data = JSON.parse(pricesRequest.responseText);
-  console.log(price_data);
 
   const request = new XMLHttpRequest();
   request.open("GET", "init_client_info.json", false);
   request.send(null);
-  console.log(request);
   game_data = JSON.parse(request.responseText);
 
 	//generte items list
@@ -484,6 +573,10 @@ $(document).ready(function() {
 		update_values()
   })
 
+  $("#info_btn").on("click", function () {
+		$("#info_menu").css("display", "flex")
+	})
+
 	$("#item_slot").on("click", ".item_slot_icon", function() {
 		temp = $("#sel_item_container").css("display")
 		$("#sel_item_container").css("display", temp == "flex" ? "none":"flex")
@@ -494,7 +587,6 @@ $(document).ready(function() {
   })
 
   $("#sel_item").on("click", ".sel_item_div", function() {
-    console.log("wat");
   	change_item($(this).attr("value"), $(this).attr("data"))
   	update_values()
   })
