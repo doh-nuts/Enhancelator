@@ -49,9 +49,11 @@
         <br>
         What level you want the item to be enhanced to
         <br><br>
-        <b>What is The green row in the result table?</b>
+        <b>What are the colored rows in the result table?</b>
         <br>
-        It shows the least cost row
+        Blue is least material cost.
+        <br>
+        Green is least total cost.
         <br><br>
         <b>What is Prot?</b>
         <br>
@@ -63,6 +65,12 @@
       </p>
 		</div>
 	</div>
+  <div id="sel_item_container" class="sel_item_container">
+    <p class="sel_item_text">Select item</p>
+    <div class="close btn" onclick="$('#sel_item_container').css('display','none')"><p>&#10005;</p></div>
+    <input id="item_filter" type="text" class="sel_item_filter" placeholder="Item Filter">
+    <div id="sel_item" class="sel_item_icons"></div>
+  </div>
 	<div id="enhance_area" class="enhance_area">
     <div class="input_block">
       <div>
@@ -73,7 +81,7 @@
             </tr>
           </thead>
           <tr>
-            <td><p>Enhance Skill Level</p></td>
+            <td><p>Skill Level</p></td>
             <td></td>
             <td align="right"><input id="i_enhancing_level" type="number" min="1" max="200" placeholder="100"></td>
           </tr>
@@ -151,12 +159,6 @@
         <div class="item_slot_icon">
           <svg><use xlink:href="#"></use></svg>
         </div>
-        <div id="sel_item_container" class="sel_item_container">
-          <p class="sel_item_text">Select item</p>
-          <div class="close btn" onclick="$('#sel_item_container').css('display','none')"><p>&#10005;</p></div>
-          <input id="item_filter" type="text" class="sel_item_filter" placeholder="Item Filter">
-          <div id="sel_item" class="sel_item_icons"></div>
-        </div>
       </div>
       <div id="item_stats" class="item_stats">
         <div id="material_stats">
@@ -233,11 +235,10 @@
                 <td><input type="number" min="0" max="100000000" value="0" id="i_protect_price" placeholder="400"></td>
               </tr>
               <tr>
-                <td colspan="2" class="protect_icons">
-                  <div id="base_icon" class="mat_icon">
-                    <svg><use xlink:href="#"></use></svg>
-                  </div>
+                <td id="base_icon" class="mat_icon">
+                  <svg><use xlink:href="#"></use></svg>
                 </td>
+                <td/>
                 <td><input id="i_base_price" type="number" min="0" max="100000000" value="0" placeholder="400"></td>
               </tr>
               <tr><td colspan="3"><div class="top_divider"></div></td></tr>
@@ -259,7 +260,7 @@
             <th class="results_header_cells">Time</th>
             <th class="results_header_cells">Exp</th>
             <th class="results_header_cells">Exp/h</th>
-            <th class="results_header_cells">Coin/Exp</th>
+            <th class="results_header_cells" title="Gold / Experience">G/E</th>
             <th class="results_header_icon_cell" id="r_mat_1_icon"><svg><use xlink:href="#"></use></svg></th>
             <th class="results_header_icon_cell" id="r_mat_2_icon"><svg><use xlink:href="#"></use></svg></th>
             <th class="results_header_icon_cell" id="r_mat_3_icon"><svg><use xlink:href="#"></use></svg></th>
@@ -267,8 +268,8 @@
             <th class="results_header_icon_cell" id="r_mat_5_icon"><svg><use xlink:href="#"></use></svg></th>
             <th class="results_header_icon_cell" ><svg><use xlink:href="#coin"></use></svg></th>
             <th class="results_header_cells">Protects</th>
-            <th class="results_header_cells">Mat Cost</th>
-            <th class="results_header_cells">Total Cost</th>
+            <th class="results_header_cells" title="Enhancing costs only, excludes base item">Mat Cost</th>
+            <th class="results_header_cells" title="(Mat Cost + Base Item + Time * Hourly Rate) * (1 + % Rate)">Total Cost</th>
           </tr>
         </thead>
         <tbody id="results_table_body" style="display: table-header-group">

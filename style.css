@@ -157,14 +157,14 @@ ul {
 
 .sel_item_container {
 	position: absolute;
-	top: 100%;
+	top: 50%;
 	left: 50%;
-	transform: translate(-50%, 0%);
+	transform: translate(-50%, -50%);
 	margin-top: 5px;
 	display: none;
 	flex-direction: column;
-	width: 718px;
-	height: 312px;
+	width: fit-content;
+	height: 60vh;
 	padding: 6px;
 	overflow: hidden;
 	border: 1px solid #98a7e9;
@@ -202,7 +202,7 @@ ul {
 
 .sel_item_icons {
 	display: grid;
-	grid-template-columns: repeat(12, 54px);
+	grid-template-columns: repeat(16, 54px);
 	grid-auto-rows: 54px;
 	grid-gap: 4px;
 	width: 100%;
@@ -407,14 +407,6 @@ input[type=number]::-webkit-inner-spin-button {
 	.item_slot {
 		width: 124px;
 		height: 124px;
-	}
-
-	.sel_item_container {
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 308px;
-		height: 646px;
 	}
 
 	.sel_item_icons {

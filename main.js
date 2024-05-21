@@ -28,7 +28,7 @@ enhance_bonus = [
 	1.78 // +20
 ],
 save_data = {
-  enhancing_level: 0,
+  enhancing_level: 100,
   laboratory_level: 0,
   enhancer_level: 0,
   selected_enhancer: "btn_cheese_enhancer",
@@ -47,7 +47,7 @@ save_data = {
   percent_rate: 2,
 },
 sim_data = {
-  item_level: 0,
+  item_level: 100,
   protect_at: 2,
   protect_element_id: "",
   protect_price: 0,
