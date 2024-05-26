@@ -113,21 +113,31 @@ function Enhancelate(save_data, sim_data)
   let markov = math.zeros(20,20);
   const success_chances = success_rate.map((a) => a / 100.0 * sim_data.total_bonus);
 
+  const use_t95 = $("#i_use_t95").prop('checked');
+  const t95_round_up = $("#i_t95_round_up").prop('checked');
+  const t95_chance = Number($("#i_t95_chance").val()) / 100.0;
+
   for(let i = 0; i < save_data.stop_at; i++)
   {
     const success_chance = (success_rate[i] / 100.0) * sim_data.total_bonus;
+    let remaining_success_chance = success_chance;
+    let remaining_fail_chance = 1.0 - success_chance;
     const destination = i >= sim_data.protect_at ? i - 1 : 0;
+
     if(save_data.tea_blessed)
     {
       markov.set([i, i+2], success_chance * 0.01);
-      markov.set([i, i+1], success_chance * 0.99);
-      markov.set([i, destination], 1 - success_chance);
+      remaining_success_chance *= 0.99;
     }
-    else
+    if(use_t95 && i >= 2 && i < sim_data.protect_at)
     {
-      markov.set([i, i+1], success_chance);
-      markov.set([i, destination], 1.0 - success_chance);
+      const dest = t95_round_up ? Math.ceil(i/2) : Math.floor(i/2);
+      markov.set([i, dest], remaining_fail_chance * t95_chance);
+      remaining_fail_chance *= (1.0 - t95_chance);
     }
+
+    markov.set([i, i+1], remaining_success_chance);
+    markov.set([i, destination], remaining_fail_chance);
   }
   markov.set([save_data.stop_at, save_data.stop_at], 1.0);
 
@@ -156,6 +166,11 @@ function Enhancelate(save_data, sim_data)
 function get_full_item_price(hrid) {
   final_cost = 0;
   let is_base_item = true;
+
+  if(hrid == "/items/coin")
+  {
+    return 1;
+  }
 
   // find action to make this
   if(game_data.itemDetailMap[hrid].categoryHrid == "/item_categories/equipment")
@@ -570,6 +585,12 @@ $(document).ready(function() {
 
   $("#i_use_enchanted").on("input", function() {
 		save_data.use_enchanted = $("#i_use_enchanted").prop('checked')
+		update_values()
+  })
+  $("#i_t95_round_up").on("input", function() {
+		update_values()
+  })
+  $("#i_use_t95").on("input", function() {
 		update_values()
   })
 
