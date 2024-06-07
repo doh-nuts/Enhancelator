@@ -193,6 +193,10 @@ function get_full_item_price(hrid) {
   {
     const fullName = game_data.itemDetailMap[hrid].name;
     const item_price_data = price_data.market[fullName];
+    if(item_price_data == undefined)
+    {
+      return 0;
+    }
     final_cost = (item_price_data.ask + item_price_data.bid) / 2.0;
   }
 
@@ -411,9 +415,7 @@ function change_item(value, key) {
       $("#r_mat_"+(i+1)+"_icon").css("display", "")
 			$("#i_mat_"+(i+1)).text(elm.count)
 			sim_data["mat_"+(i+1)] = elm.count
-      const fullName = game_data.itemDetailMap[elm.itemHrid].name;
-      const material_price_data = price_data.market[fullName];
-      const final_material_cost = (material_price_data.ask + material_price_data.bid) / 2.0;
+      const final_material_cost = get_full_item_price(elm.itemHrid);
       $("#i_prc_"+(i+1)).attr("placeholder", final_material_cost);
       sim_data["prc_"+(i+1)] = final_material_cost;
 		}
