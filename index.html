@@ -37,13 +37,17 @@
         <br>
         The Checkbox is whether to take into account Enchanted Gloves effect or not, and the field is for its enhancement level
         <br><br>
+        <b>What is Guzzling pouch?</b>
+        <br>
+        The Checkbox is whether to take into account Guzzling pouch effect or not, and the field is for its enhancement level
+        <br><br>
         <b>What is Hourly Rate?</b>
         <br>
         An added value after cost calculation, it is a way to calculate total amount to charge someone if you are charging based on hourly rate
         <br><br>
         <b>What is % Rate?</b>
         <br>
-        An added value after cost calculation, it is a way charge someone based on % relative to to final cost
+        An added value after cost calculation, it is a way charge someone based on % relative to final cost
         <br><br>
         <b>What is Target?</b>
         <br>
@@ -86,15 +90,20 @@
             <td align="right"><input id="i_enhancing_level" type="number" min="1" max="200" placeholder="100"></td>
           </tr>
           <tr>
-            <td><p>Laboratory Level</p></td>
+            <td><p>Observatory Level</p></td>
             <td></td>
-            <td align="right"><input id="i_laboratory_level" type="number" min="0" max="8" placeholder="0"></td>
+            <td align="right"><input id="i_observatory_level" type="number" min="0" max="8" placeholder="0"></td>
           </tr>
           <tr><td colspan="3"><div class="top_divider"></div></td></tr>
           <tr>
             <td><p>Enchanted Gloves</p></td>
             <td align="center"><input id="i_use_enchanted" type="checkbox" class="enhancer_stats_check_box"></td>
             <td align="right"><input id="i_enchanted_level" type="number" min="0" max="20" placeholder="0"></td>
+          </tr>
+          <tr>
+            <td><p>Guzzling Pouch</p></td>
+            <td align="center"><input id="i_use_guzzling" type="checkbox" class="enhancer_stats_check_box"></td>
+            <td align="right"><input id="i_guzzling_level" type="number" min="0" max="20" placeholder="0"></td>
           </tr>
           <tr><td colspan="3"><div class="top_divider"></div></td></tr>
           <tr>
@@ -135,6 +144,9 @@
               </button>
               <button id="tea_super_enhancing" class="btn_icon" style="width:48px; height:48px;" onclick="tea_selection(this)">
                 <svg><use xlink:href="#super_enhancing_tea"></use></svg>
+              </button>
+              <button id="tea_ultra_enhancing" class="btn_icon" style="width:48px; height:48px;" onclick="tea_selection(this)">
+                <svg><use xlink:href="#ultra_enhancing_tea"></use></svg>
               </button>
               <button id="tea_blessed" class="btn_icon" style="width:48px; height:48px;" onclick="tea_selection(this)">
                 <svg><use xlink:href="#blessed_tea"></use></svg>
