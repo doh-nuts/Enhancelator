@@ -223,8 +223,13 @@ function update_values() {
 	save_data.enhancer_level = Number($("#i_enhancer_level").val())
 	temp = enhancable_items.find((a) => a.hrid == key).equipmentDetail.noncombatStats.enhancingSuccess * 100 * enhance_bonus[save_data.enhancer_level]
 	enhancer_bonus = Number(temp.toFixed(2))
+
+  // Guzzling bonus
   temp = enhancable_items.find((a) => a.hrid == "/items/guzzling_pouch").equipmentDetail.noncombatStats.drinkConcentration * 100 * enhance_bonus[save_data.guzzling_level]
   guzzling_bonus = save_data.use_guzzling ? Number((1+temp/100).toFixed(3)) : 1;
+
+  //Tea speed bonus
+  tea_speed_bonus = save_data.tea_enhancing ? 2*guzzling_bonus : save_data.tea_super_enhancing ? 4*guzzling_bonus : save_data.tea_ultra_enhancing ? 6*guzzling_bonus : 0;
 
   // Total bonus
   effective_level = save_data.enhancing_level + (save_data.tea_enhancing ? 3*guzzling_bonus : 0) + (save_data.tea_super_enhancing ? 6*guzzling_bonus : 0) + (save_data.tea_ultra_enhancing ? 8*guzzling_bonus : 0);
@@ -238,11 +243,9 @@ function update_values() {
   //save_data.enchanted_level = Number($("#i_enchanted_level").val());
   temp = enhancable_items.find((a) => a.hrid == "/items/enchanted_gloves").equipmentDetail.noncombatStats.enhancingSpeed * 100 * enhance_bonus[save_data.enchanted_level]
   glove_bonus = save_data.use_enchanted ? Number(temp.toFixed(2)) : 0.0;
-	temp = (12/(1+(save_data.enhancing_level>sim_data.item_level ? ((effective_level+save_data.observatory_level-sim_data.item_level)+glove_bonus)/100 : (save_data.observatory_level+glove_bonus)/100))).toFixed(2)
+	temp = (12/(1+(save_data.enhancing_level>sim_data.item_level ? ((effective_level+save_data.observatory_level-sim_data.item_level)+glove_bonus+tea_speed_bonus)/100 : (save_data.observatory_level+glove_bonus+tea_speed_bonus)/100))).toFixed(2)
 	$("#o_action_speed").text(temp + "s")
 	sim_data.attempt_time = Number(temp)
-  console.log(sim_data, save_data.observatory_level, guzzling_bonus, save_data.tea_ultra_enhancing, save_data.guzzling_level);
-
 	localStorage.setItem("Enhancelator", JSON.stringify(save_data))
 	reset_results()
 }
@@ -488,12 +491,10 @@ function init_user_data() {
 		save_data = JSON.parse(localStorage.getItem("Enhancelator"));
 
     // "migration" system
-    console.log(save_data.guzzling_level, save_data.use_guzzling, save_data.laboratory_level, save_data.observatory_level);
     if(save_data.guzzling_level == undefined) save_data.guzzling_level = 0;
     if(save_data.use_guzzling == undefined) save_data.use_guzzling = false;
     if(save_data.tea_ultra_enhancing == undefined) save_data.tea_ultra_enhancing = false;
     if(save_data.observatory_level == undefined && save_data.laboratory_level != undefined) save_data.observatory_level = save_data.laboratory_level;
-    console.log(save_data.guzzling_level, save_data.use_guzzling, save_data.laboratory_level, save_data.observatory_level);
 
     // update the UI with the saved values
 		$("#i_enhancing_level").val(save_data.enhancing_level);
