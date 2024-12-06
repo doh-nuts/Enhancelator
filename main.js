@@ -155,7 +155,7 @@ function Enhancelate(save_data, sim_data)
      math.flatten(math.row(protectAttempts, 0).valueOf());
   const protects = protectAttemptsArray.map((a, i) => a * markov.get([i + sim_data.protect_at, i + sim_data.protect_at - 1])).reduce((a, b) => a + b, 0);
   const exp = math.flatten(math.row(attemptsArray, 0).valueOf()).reduce((acc, a, i) => {
-    return acc + (a * success_chances[i] + a * 0.1 * (1 - success_chances[i])) * (save_data.tea_wisdom ? 1.12*guzzling_bonus : 1.00) * (cal_exp(sim_data.item_level, i));
+    return acc + (a * success_chances[i] + a * 0.1 * (1 - success_chances[i])) * (save_data.tea_wisdom ? 1 + 0.12*guzzling_bonus : 1.00) * (cal_exp(sim_data.item_level, i));
   }, 0);
   
   results = {};
