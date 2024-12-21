@@ -33,13 +33,9 @@
         <br>
         The result will be displayed in a table, the shown result values are average values, given the nature of enhancing, the item might cost less than what represented or might cost x10 more!
         <br><br>
-        <b>What is Enchanted Gloves?</b>
+        <b>What are Enchanted Gloves, Guzzling Pouch, Enhancer's Top/Bottoms?</b>
         <br>
-        The Checkbox is whether to take into account Enchanted Gloves effect or not, and the field is for its enhancement level
-        <br><br>
-        <b>What is Guzzling pouch?</b>
-        <br>
-        The Checkbox is whether to take into account Guzzling pouch effect or not, and the field is for its enhancement level
+        The Checkbox is whether to take into account the item's effect or not, and the field is for its enhancement level
         <br><br>
         <b>What is Hourly Rate?</b>
         <br>
@@ -79,11 +75,6 @@
     <div class="input_block">
       <div>
         <table>
-          <thead>
-            <tr>
-              <th colspan="3">Enhancer Traits</th>
-            </tr>
-          </thead>
           <tr>
             <td><p>Skill Level</p></td>
             <td></td>
@@ -104,6 +95,16 @@
             <td><p>Guzzling Pouch</p></td>
             <td align="center"><input id="i_use_guzzling" type="checkbox" class="enhancer_stats_check_box"></td>
             <td align="right"><input id="i_guzzling_level" type="number" min="0" max="20" placeholder="0"></td>
+          </tr>
+          <tr>
+            <td><p>Enhancer's Top</p></td>
+            <td align="center"><input id="i_use_enhancer_top" type="checkbox" class="enhancer_stats_check_box"></td>
+            <td align="right"><input id="i_enhancer_top_level" type="number" min="0" max="20" placeholder="0"></td>
+          </tr>
+          <tr>
+            <td><p>Enhancer's Bottoms</p></td>
+            <td align="center"><input id="i_use_enhancer_bot" type="checkbox" class="enhancer_stats_check_box"></td>
+            <td align="right"><input id="i_enhancer_bot_level" type="number" min="0" max="20" placeholder="0"></td>
           </tr>
           <tr><td colspan="3"><div class="top_divider"></div></td></tr>
           <tr>
@@ -133,6 +134,9 @@
               </button>
               <button id="btn_holy_enhancer" class="btn_icon" onclick="enhancer_selection(this)">
                 <svg><use xlink:href="#holy_enhancer"></use></svg>
+              </button>
+              <button id="btn_celestial_enhancer" class="btn_icon" onclick="enhancer_selection(this)">
+                <svg><use xlink:href="#celestial_enhancer"></use></svg>
               </button>
             </td>
           </tr>
