@@ -66,7 +66,8 @@
 		</div>
 	</div>
   <div id="sel_item_container" class="sel_item_container">
-    <p class="sel_item_text">Select item</p>
+    <p class="sel_item_text">Hide Junk: </p>
+    <input id="i_hide_junk" type="checkbox" class="sel_item_hide_junk_checkbox">
     <div class="close btn" onclick="$('#sel_item_container').css('display','none')"><p>&#10005;</p></div>
     <input id="item_filter" type="text" class="sel_item_filter" placeholder="Item Filter">
     <div id="sel_item" class="sel_item_icons"></div>
@@ -163,7 +164,7 @@
           <tr><td colspan="3"><div class="top_divider"></div></td></tr>
           <tr>
             <td colspan="2"><p>Hourly Rate:</p></td>
-            <td align="right"><input id="i_hourly_rate" type="number" min="0" max="100000000" placeholder="3000000"></td>
+            <td align="right"><input id="i_hourly_rate" type="number" min="0" max="100000000" placeholder="5000000"></td>
           </tr>
           <tr>
             <td colspan="2"><p>% Rate:</p></td>

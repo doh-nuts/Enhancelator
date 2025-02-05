@@ -497,6 +497,20 @@ function filter() {
       $("#"+key+"_list").css("display", "flex")
     })
   }
+  if(save_data.hide_junk)
+  {
+    enhancable_items.forEach(function(item) {
+      key = item.hrid.substring(7);
+      junk_keywords = ["cheese", "verdant", "azure", "burble", "crimson", "rainbow",
+        "wooden", "birch", "cedar", "purpleheart", "ginkgo", "redwood", "arcane",
+        "rough", "reptile", "gobo", "beast", "umbral",
+        "cotton", "linen", "bamboo", "silk", "radiant",
+      ];
+      is_junk = undefined != junk_keywords.find(function(item) { return key.includes(item); });
+      if(is_junk)
+        $("#"+key+"_list").css("display", "none")
+    })
+  }
 }
 
 function init_user_data() {
@@ -512,6 +526,7 @@ function init_user_data() {
     if(save_data.use_enhancer_bot == undefined) save_data.use_enhancer_bot = false;
     if(save_data.tea_ultra_enhancing == undefined) save_data.tea_ultra_enhancing = false;
     if(save_data.observatory_level == undefined && save_data.laboratory_level != undefined) save_data.observatory_level = save_data.laboratory_level;
+    if(save_data.hide_junk == undefined) save_data.hide_junk = false;
 
     // update the UI with the saved values
 		$("#i_enhancing_level").val(save_data.enhancing_level);
@@ -525,6 +540,7 @@ function init_user_data() {
     $("#i_guzzling_level").val(save_data.guzzling_level);
     $("#i_enhancer_top_level").val(save_data.enhancer_top_level);
     $("#i_enhancer_bot_level").val(save_data.enhancer_bot_level);
+    $("#i_hide_junk").prop("checked", save_data.hide_junk);
 
     if(save_data.tea_enhancing)       { $("#tea_enhancing").attr("class", "btn_icon_selected"); }
     if(save_data.tea_super_enhancing) { $("#tea_super_enhancing").attr("class", "btn_icon_selected"); }
@@ -643,6 +659,11 @@ $(document).ready(function() {
     save_data.use_enhancer_bot = $("#i_use_enhancer_bot").prop('checked')
     update_values()
   })
+  $("#i_hide_junk").on("input", function() {
+    save_data.hide_junk = $("#i_hide_junk").prop('checked');
+    filter();
+    localStorage.setItem("Enhancelator", JSON.stringify(save_data));
+  });
   $("#i_t95_round_up").on("input", function() {
 		update_values()
   })
@@ -657,6 +678,7 @@ $(document).ready(function() {
 	$("#item_slot").on("click", ".item_slot_icon", function() {
 		temp = $("#sel_item_container").css("display")
 		$("#sel_item_container").css("display", temp == "flex" ? "none":"flex")
+    filter();
 	})
 
   $("#item_filter").on("input", function() {
