@@ -120,10 +120,6 @@ function Enhancelate(save_data, sim_data)
   let markov = math.zeros(20,20);
   const success_chances = success_rate.map((a) => a / 100.0 * sim_data.total_bonus);
 
-  const use_t95 = $("#i_use_t95").prop('checked');
-  const t95_round_up = $("#i_t95_round_up").prop('checked');
-  const t95_chance = Number($("#i_t95_chance").val()) / 100.0;
-
   for(let i = 0; i < save_data.stop_at; i++)
   {
     const success_chance = (success_rate[i] / 100.0) * sim_data.total_bonus;
@@ -135,12 +131,6 @@ function Enhancelate(save_data, sim_data)
     {
       markov.set([i, i+2], success_chance * 0.01 * guzzling_bonus);
       remaining_success_chance *= 1 - 0.01 * guzzling_bonus;
-    }
-    if(use_t95 && i >= 2 && i < sim_data.protect_at)
-    {
-      const dest = t95_round_up ? Math.ceil(i/2) : Math.floor(i/2);
-      markov.set([i, dest], remaining_fail_chance * t95_chance);
-      remaining_fail_chance *= (1.0 - t95_chance);
     }
 
     markov.set([i, i+1], remaining_success_chance);
@@ -257,7 +247,6 @@ function update_values() {
                (save_data.use_enhancer_top ? calc_speed("/items/enhancers_top", save_data.enhancer_top_level) : 0.0) +
                (save_data.use_enhancer_bot ? calc_speed("/items/enhancers_bottoms", save_data.enhancer_bot_level) : 0.0);
 	temp = (12/(1+(save_data.enhancing_level>sim_data.item_level ? ((effective_level+save_data.observatory_level-sim_data.item_level)+item_bonus+tea_speed_bonus)/100 : (save_data.observatory_level+item_bonus+tea_speed_bonus)/100))).toFixed(2)
-	$("#o_action_speed").text(temp + "s")
 	sim_data.attempt_time = Number(temp)
 	localStorage.setItem("Enhancelator", JSON.stringify(save_data))
 	reset_results()
@@ -383,6 +372,14 @@ function reset_results() {
     AddNumberCell(result.mat_cost);
     AddNumberCell(result.ttl_cost);
   }
+
+  var decompElement = document.getElementById('decomp');
+  const essenceCount = Math.floor(Math.round(2.0 * (0.5 + 0.1*Math.pow(1.05, Number(sim_data.item_level))) * Math.pow(2, Number(save_data.stop_at))));
+  const essenceMarketCost = get_full_item_price("/items/enhancing_essence");
+  const decompValue = essenceCount * essenceMarketCost * 0.78;
+  const options = {minimumFractionDigits: 0, maximumFractionDigits: 0};
+  const formatedCost = Number(Number.parseFloat(decompValue)).toLocaleString(undefined, options);
+  decompElement.textContent = "Decomposition Value: " + formatedCost + " (" + essenceCount + " * " + essenceMarketCost + " * 0.78)";
 }
 
 function change_item(value, key) {
@@ -664,12 +661,6 @@ $(document).ready(function() {
     filter();
     localStorage.setItem("Enhancelator", JSON.stringify(save_data));
   });
-  $("#i_t95_round_up").on("input", function() {
-		update_values()
-  })
-  $("#i_use_t95").on("input", function() {
-		update_values()
-  })
 
   $("#info_btn").on("click", function () {
 		$("#info_menu").css("display", "flex")
