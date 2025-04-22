@@ -371,6 +371,16 @@ function reset_results() {
     AddNumberCell(result.protect_count, 2);
     AddNumberCell(result.mat_cost);
     AddNumberCell(result.ttl_cost);
+    let sim_btn = document.createElement("button");
+    let sim_data_tmp = structuredClone(sim_data);
+    sim_data_tmp.protect_at = protect_at;
+    sim_btn.onclick = function() {
+      sim_enhance(save_data, sim_data_tmp); 
+    };
+    sim_btn.innerText = "Simulate";
+    newCell = newRow.insertCell();
+    newCell.className = 'results_data_cells';
+    newCell.appendChild(sim_btn);
   }
 
   var decompElement = document.getElementById('decomp');
@@ -380,6 +390,68 @@ function reset_results() {
   const options = {minimumFractionDigits: 0, maximumFractionDigits: 0};
   const formatedCost = Number(Number.parseFloat(decompValue)).toLocaleString(undefined, options);
   decompElement.textContent = "Decomposition Value: " + formatedCost + " (" + essenceCount + " * " + essenceMarketCost + " * 0.78)";
+}
+
+function updateProgress(completed, total) {
+  const percent = Math.floor((completed / total) * 100);
+  document.getElementById("progress-bar").style.width = `${percent}%`;
+  document.getElementById("progress-text").innerText = `${percent}%`;
+}
+
+function formatPrice(price) {
+  if (price > 1000000) {
+    return (price / 1000000).toFixed(2) + "M";
+  } else if (price > 1000) {
+    return (price / 1000).toFixed(2) + "K";
+  } else {
+    return String(price);
+  }
+}
+
+function sim_enhance(save_data, sim_data) {
+  const overlay = document.getElementById("overlay");
+  let completed_times = 0;
+  const sim_time = Number($("#i_emu_time").val());
+  updateProgress(0, sim_time);
+  overlay.style.display = "flex";
+  const success_chances = success_rate.map((a) => a / 100.0 * sim_data.total_bonus);
+  const step_price = sim_data.mat_1 * sim_data.prc_1 + sim_data.mat_2 * sim_data.prc_2 + sim_data.mat_3 * sim_data.prc_3 + sim_data.mat_4 * sim_data.prc_4 + sim_data.mat_5 * sim_data.prc_5 + sim_data.coins;
+  const protect_at = sim_data.protect_at;
+  const protect_price = sim_data.protect_price;
+  const stop_at = save_data.stop_at;
+  const use_blessed = save_data.tea_blessed;
+  const base_price = ($("#i_base_price").val() == "") ? Number($("#i_base_price").attr("placeholder")) : Number($("#i_base_price").val());
+  const worker = new Worker('worker.js');
+  let results = [];
+  worker.onmessage = function(e) {
+    completed_times++;
+    const result = e.data;
+    results.push(result);
+    updateProgress(completed_times, sim_time);
+    if (completed_times == sim_time) {
+      overlay.style.display = "none";
+      worker.terminate();
+      results.sort((a, b) => a - b);
+      const pt_95 = Math.floor(results.length * 0.95);
+      const pt_90 = Math.floor(results.length * 0.9);
+      const pt_80 = Math.floor(results.length * 0.8);
+      const pt_75 = Math.floor(results.length * 0.75);
+      const pt_50 = Math.floor(results.length * 0.5);
+      alert("Enhance simulate result:\n95% Success cost: " + formatPrice(results[pt_95] + base_price) + 
+      "\n90% Success cost: " + formatPrice(results[pt_90] + base_price) + 
+      "\n80% Success cost: " + formatPrice(results[pt_80] + base_price) +
+      "\n75% Success cost: " + formatPrice(results[pt_75] + base_price) +
+      "\n50% Success cost: " + formatPrice(results[pt_50] + base_price));
+    }
+  };
+  worker.onerror = function(e) {
+    console.error('Error in worker:', e);
+    overlay.style.display = "none";
+    worker.terminate();
+  };
+  for (let i = 0; i < sim_time; i++) {
+    worker.postMessage({ step_price, protect_price, stop_at, success_chances, protect_at, use_blessed, guzzling_bonus });
+  }
 }
 
 function change_item(value, key) {
