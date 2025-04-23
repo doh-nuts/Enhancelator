@@ -273,7 +273,9 @@ function validate_field(id, key, value, min, max) {
   if(key in save_data) { save_data[key] = value; }
   if(key in sim_data)  { sim_data [key] = value; }
 
-	update_values()
+  if (id != "i_emu_time" && id != "i_emu_money") {
+    update_values();
+  }
 }
 
 function reset() {
@@ -420,6 +422,8 @@ function sim_enhance(save_data, sim_data) {
   const stop_at = save_data.stop_at;
   const use_blessed = save_data.tea_blessed;
   const base_price = ($("#i_base_price").val() == "") ? Number($("#i_base_price").attr("placeholder")) : Number($("#i_base_price").val());
+  const sort_with_time = $("#i_emu_w_aux").prop('checked');
+  const money_i_have = Number($("#i_emu_money").val());
   const worker = new Worker('worker.js');
   let results = [];
   worker.onmessage = function(e) {
@@ -431,7 +435,12 @@ function sim_enhance(save_data, sim_data) {
       $("#overlay").css("display", "none");
       $("#sim_result_wrapper").css("display", "block");
       worker.terminate();
-      results.sort((a, b) => a - b);
+      if (sort_with_time) {
+        const ratio = save_data.hourly_rate * sim_data.attempt_time / 3600;
+        results.sort((a, b) => (a.cost + a.actions * ratio) - (b.cost + b.actions * ratio));
+      } else {
+        results.sort((a, b) => a.cost - b.cost);
+      }
       const pt_99 = Math.floor(results.length * 0.99);
       const pt_95 = Math.floor(results.length * 0.95);
       const pt_90 = Math.floor(results.length * 0.9);
@@ -456,6 +465,7 @@ function sim_enhance(save_data, sim_data) {
       };
 
       for (let i = 0; i < perc_texts.length; i++) {
+        const est_result = results[perc_vals[i]];
         var newRow = tbodyRef.insertRow();
         // Percentiles
         newText = document.createTextNode(perc_texts[i]);
@@ -463,29 +473,52 @@ function sim_enhance(save_data, sim_data) {
         newCell.className = 'results_sim_cells';
         newCell.appendChild(newText);
         // TODO: actions
-        let est_actions = 0;
+        let est_actions = est_result.actions;
         AddNumberCell(est_actions)
         // Time
-        newText = document.createTextNode(formatTime(sim_data.attempt_time * est_actions));
+        newText = document.createTextNode(formatTime(sim_data.attempt_time * est_result.actions));
         newCell = newRow.insertCell();
         newCell.className = 'results_data_cells';
         newCell.appendChild(newText);
         // TODO: materials and costs
         // Note that the valid #est_mats should be equal to #materials
-        let est_mats = [1, 2, 3, 4, 5];
-        let est_coins = 0;
-        let est_protect_count = 0;
-        if (est_mats[0] > 0) { AddNumberCell(est_mats[0]); }
-        if (est_mats[1] > 0) { AddNumberCell(est_mats[1]); }
-        if (est_mats[2] > 0) { AddNumberCell(est_mats[2]); }
-        if (est_mats[3] > 0) { AddNumberCell(est_mats[3]); }
-        if (est_mats[4] > 0) { AddNumberCell(est_mats[4]); }
+        let est_mats = [sim_data.mat_1, sim_data.mat_2, sim_data.mat_3, sim_data.mat_4, sim_data.mat_5];
+        let est_coins = est_result.actions * sim_data.coins;
+        let est_protect_count = est_result.protects;
+        if (est_mats[0] > 0) { AddNumberCell(est_mats[0] * est_result.actions); }
+        if (est_mats[1] > 0) { AddNumberCell(est_mats[1] * est_result.actions); }
+        if (est_mats[2] > 0) { AddNumberCell(est_mats[2] * est_result.actions); }
+        if (est_mats[3] > 0) { AddNumberCell(est_mats[3] * est_result.actions); }
+        if (est_mats[4] > 0) { AddNumberCell(est_mats[4] * est_result.actions); }
         AddNumberCell(est_coins);
         AddNumberCell(est_protect_count, 2);
         // Estimated Cost
-        const options = {minimumFractionDigits: 0, maximumFractionDigits: 0};
-        let est_cost = results[perc_vals[i]] + base_price
-        AddNumberCell(est_cost);
+        AddNumberCell(est_result.cost);
+        AddNumberCell(est_result.cost + base_price);
+        AddNumberCell(est_result.cost + base_price + save_data.hourly_rate * sim_data.attempt_time * est_result.actions / 3600);
+      }
+
+      // If coins i have is not zero, calculate success rate
+      if (money_i_have > 0) {
+        let success_rate = 0;
+        if (sort_with_time) {
+          results.sort((a, b) => a.cost - b.cost);
+        }
+        const mat_coins = money_i_have - base_price;
+        let n_success = 0
+        if (mat_coins > 0) {
+          for (; n_success < results.length; n_success++) {
+            if (results[n_success].cost > mat_coins) {
+              break;
+            }
+          }
+          success_rate = (n_success / results.length) * 100;
+        }
+        $("#sim_success_rate_pt").text(success_rate.toFixed(2));
+        $("#sim_success_rate_coins").text(money_i_have.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}));
+        $("#sim_success_rate_wrapper").css("display", "block");
+      } else {
+        $("#sim_success_rate_wrapper").css("display", "none");
       }
     }
   };

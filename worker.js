@@ -8,6 +8,8 @@ function sim_cost(
     guzzling_bonus,
 ) {
     let current_level = 0;
+    let actions = 0;
+    let protects = 0;
     let cost = 0;
     while(current_level < stop_at) {
       const prob = success_chances[current_level];
@@ -23,12 +25,14 @@ function sim_cost(
         if (current_level >= protect_at) {
           cost += protect_price;
           current_level--;
+          protects++;
         } else {
           current_level = 0;
         }
       }
+      actions++;
     }
-    return cost;
+    return { cost, actions, protects };
 }
 
 onmessage = function(e) {
