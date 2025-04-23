@@ -519,8 +519,8 @@ function sim_enhance(save_data, sim_data) {
           results.sort((a, b) => a.cost - b.cost);
         }
         const mat_coins = money_i_have - base_price;
-        let n_success = results.findIndex((r) => (mat_coins > r.cost));
-        let success_rate = (n_success + 1) / results.length * 100;
+        let n_success = results.findIndex((r) => (mat_coins < r.cost));
+        let success_rate = (n_success == -1) ? 100 : (n_success + 1) / results.length * 100;
         $("#sim_success_rate_pt").text(success_rate.toFixed(2));
         $("#sim_success_rate_coins").text(money_i_have.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}));
         $("#sim_success_rate_wrapper").css("display", "block");
