@@ -21,7 +21,7 @@
     <div id="progress-text">0%</div>
   </div>
   <div class="by">
-		<p>Made by: dohnuts, MangoFlavor. QA: Purpenflurb</p>
+		<p>Made by: dohnuts, MangoFlavor, guch8017, AyajiLin. QA: Purpenflurb</p>
 		<div id="info_btn" class="info_btn btn">
 			<p>?</p>
 		</div>
@@ -69,6 +69,36 @@
         <br>
         Enhance attempts
       </p>
+		</div>
+	</div>
+  <div id="sim_info_menu" class="info_menu">
+		<div>
+      <div class="close btn" onclick="$('#sim_info_menu').css('display','none')"><p>&#10005;</p></div>
+      <section>
+        <h3>How to use</h3>
+        <ul>
+          <li>Fill in number of simulation samples (# Simulation)</li>
+          <li>Click the "Simulate" button at specific Prot. level</li>
+          <li>Simulated data for the data row will be shown</li>
+        </ul>
+      </section>
+      <br />
+      <section>
+        <h3>Metrics Explained</h3>
+        <p>
+          <b>Success Rate: </b>The data is shown using different percentile of success rate. 
+          For example, a 50% success rate means that 50% of the attempts will succeed with the estimated costs.
+        </p>
+        <p>
+          <b>Metrics with *: </b>The estimated costs of certain items at specific success rate. 
+          Note that this is the percentile data for certain items, which is kinda unrelated to the Est. Cost.
+          However, this data is a good sign for the user to determine the usage of certain items to some degree.
+        </p>
+        <p>
+          <b>Est. Cost: </b>The estimated cost at different success rate. 
+          If the "Sim w/ Aux" is checked, the estimated cost will include the Hourly Rate and the % Rate.
+        </p>
+      </section>
 		</div>
 	</div>
   <div id="sel_item_container" class="sel_item_container">
@@ -270,8 +300,12 @@
                 <td><input id="i_stop_at" type="number" min="1" max="20" value="10" placeholder="10"></td>
               </tr>
               <tr>
-                <td colspan="2"><p>Emu Times:</p></td>
-                <td><input id="i_emu_time" type="number" min="1" max="100000" value="10000" placeholder="10000"></td>
+                <td colspan="2"><p># Simulation:</p></td>
+                <td><input id="i_emu_time" type="number" min="1" max="100000" value="32768" placeholder="32768"></td>
+              </tr>
+              <tr>
+                <td colspan="2"><p>Sim w/ Aux:</p></td>
+                <td><input id="i_emu_w_aux" type="checkbox" class="enhancer_stats_check_box"></td>
               </tr>
             </tbody>
           </table>
@@ -297,12 +331,37 @@
             <th class="results_header_cells">Protects</th>
             <th class="results_header_cells" title="Enhancing costs only, excludes base item">Mat Cost</th>
             <th class="results_header_cells" title="(Mat Cost + Base Item + Time * Hourly Rate) * (1 + % Rate)">Total Cost</th>
+            <th class="results_header_cells" title="Simulation Button">Simulation</th>
           </tr>
         </thead>
         <tbody id="results_table_body" style="display: table-header-group">
         </tbody>
       </table>
 	  </div>
+    <div id="sim_result_wrapper">
+      <h1>Simulation Results&nbsp;<span id="sim_info_btn" class="btn">&nbsp;?&nbsp;</span></h1>
+      <div class="sim_result">
+        <table id="sim_result_table" class="results_table">
+          <thead>
+            <tr>
+              <th class="results_header_cells">Success Rate</th>
+              <th class="results_header_cells">Actions<sup>*</sup></th>
+              <th class="results_header_cells">Time<sup>*</sup></th>
+              <th class="sim_results_header_icon_cell" id="sim_r_mat_1_icon"><svg><use xlink:href="#"></use></svg><sup>*</sup></th>
+              <th class="sim_results_header_icon_cell" id="sim_r_mat_2_icon"><svg><use xlink:href="#"></use></svg><sup>*</sup></th>
+              <th class="sim_results_header_icon_cell" id="sim_r_mat_3_icon"><svg><use xlink:href="#"></use></svg><sup>*</sup></th>
+              <th class="sim_results_header_icon_cell" id="sim_r_mat_4_icon"><svg><use xlink:href="#"></use></svg><sup>*</sup></th>
+              <th class="sim_results_header_icon_cell" id="sim_r_mat_5_icon"><svg><use xlink:href="#"></use></svg><sup>*</sup></th>
+              <th class="sim_results_header_icon_cell" ><svg><use xlink:href="#coin"></use></svg><sup>*</sup></th>
+            <th class="results_header_cells">Protects<sup>*</sup></th>
+              <th class="results_header_cells">Est. Cost</th>
+            </tr>
+          </thead>
+          <tbody id="sim_result_table_body" style="display: table-header-group">
+          </tbody>
+        </table>
+      </div>
+    </div>
     <div id="decomp" style="display: none;">Decomposition Value:</div>
   </div>
 

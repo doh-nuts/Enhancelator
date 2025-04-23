@@ -299,6 +299,11 @@ function close_sel_menus() {
 	$("#sel_item_container").css("display", "none")
 }
 
+function reset_sim_results() {
+  var tbodyRef = document.getElementById('sim_result_table').getElementsByTagName('tbody')[0];
+  while(tbodyRef.rows.length > 0) { tbodyRef.deleteRow(0); }
+}
+
 //changing any value will change avg, so it must be reseted
 function reset_results() {
 	$("#used_proto_cell").css("display", "none")
@@ -308,6 +313,7 @@ function reset_results() {
   
   var tbodyRef = document.getElementById('myTable').getElementsByTagName('tbody')[0];
   while(tbodyRef.rows.length > 0) { tbodyRef.deleteRow(0); }
+  reset_sim_results();
 
   const protect_levels = [...Array(save_data.stop_at - 1).keys()].map((x, i) => i + 2);
   all_results = protect_levels.map((a) => { sim_data.protect_at = a; return Enhancelate(save_data, sim_data); });
@@ -371,7 +377,10 @@ function reset_results() {
     AddNumberCell(result.protect_count, 2);
     AddNumberCell(result.mat_cost);
     AddNumberCell(result.ttl_cost);
+    // simulation
+    $("#sim_result_wrapper").css("display", "none");
     let sim_btn = document.createElement("button");
+    sim_btn.className = 'sim_btn';
     let sim_data_tmp = structuredClone(sim_data);
     sim_data_tmp.protect_at = protect_at;
     sim_btn.onclick = function() {
@@ -379,7 +388,7 @@ function reset_results() {
     };
     sim_btn.innerText = "Simulate";
     newCell = newRow.insertCell();
-    newCell.className = 'results_data_cells';
+    newCell.className = 'results_sim_cells';
     newCell.appendChild(sim_btn);
   }
 
@@ -394,26 +403,16 @@ function reset_results() {
 
 function updateProgress(completed, total) {
   const percent = Math.floor((completed / total) * 100);
-  document.getElementById("progress-bar").style.width = `${percent}%`;
-  document.getElementById("progress-text").innerText = `${percent}%`;
+  $("#progress-bar").css("width", `${percent}%`);
+  $("#progress-text").text(`${percent}%`);
 }
 
-function formatPrice(price) {
-  if (price > 1000000) {
-    return (price / 1000000).toFixed(2) + "M";
-  } else if (price > 1000) {
-    return (price / 1000).toFixed(2) + "K";
-  } else {
-    return String(price);
-  }
-}
-
+// Simulation-based sampling function for hierarchical success rates
 function sim_enhance(save_data, sim_data) {
-  const overlay = document.getElementById("overlay");
   let completed_times = 0;
   const sim_time = Number($("#i_emu_time").val());
   updateProgress(0, sim_time);
-  overlay.style.display = "flex";
+  $("#overlay").css("display", "flex");
   const success_chances = success_rate.map((a) => a / 100.0 * sim_data.total_bonus);
   const step_price = sim_data.mat_1 * sim_data.prc_1 + sim_data.mat_2 * sim_data.prc_2 + sim_data.mat_3 * sim_data.prc_3 + sim_data.mat_4 * sim_data.prc_4 + sim_data.mat_5 * sim_data.prc_5 + sim_data.coins;
   const protect_at = sim_data.protect_at;
@@ -429,24 +428,71 @@ function sim_enhance(save_data, sim_data) {
     results.push(result);
     updateProgress(completed_times, sim_time);
     if (completed_times == sim_time) {
-      overlay.style.display = "none";
+      $("#overlay").css("display", "none");
+      $("#sim_result_wrapper").css("display", "block");
       worker.terminate();
       results.sort((a, b) => a - b);
+      const pt_99 = Math.floor(results.length * 0.99);
       const pt_95 = Math.floor(results.length * 0.95);
       const pt_90 = Math.floor(results.length * 0.9);
-      const pt_80 = Math.floor(results.length * 0.8);
       const pt_75 = Math.floor(results.length * 0.75);
       const pt_50 = Math.floor(results.length * 0.5);
-      alert("Enhance simulate result:\n95% Success cost: " + formatPrice(results[pt_95] + base_price) + 
-      "\n90% Success cost: " + formatPrice(results[pt_90] + base_price) + 
-      "\n80% Success cost: " + formatPrice(results[pt_80] + base_price) +
-      "\n75% Success cost: " + formatPrice(results[pt_75] + base_price) +
-      "\n50% Success cost: " + formatPrice(results[pt_50] + base_price));
+      const pt_25 = Math.floor(results.length * 0.25);
+
+      // Table visualization
+      const perc_texts = ["25%", "50%", "75%", "90%", "95%", "99%"];
+      const perc_vals = [pt_25, pt_50, pt_75, pt_90, pt_95, pt_99];
+      var tbodyRef = document.getElementById('sim_result_table').getElementsByTagName('tbody')[0];
+      reset_sim_results();
+      var newText = null;
+      var newCell = null;
+      function AddNumberCell(num, rounding) {
+        if(rounding == null) rounding = 0;
+        const options = {minimumFractionDigits: rounding, maximumFractionDigits: rounding};
+        newText = document.createTextNode(Number(Number.parseFloat(num)).toLocaleString(undefined, options));
+        newCell = newRow.insertCell();
+        newCell.className = 'results_data_cells';
+        newCell.appendChild(newText);
+      };
+
+      for (let i = 0; i < perc_texts.length; i++) {
+        var newRow = tbodyRef.insertRow();
+        // Percentiles
+        newText = document.createTextNode(perc_texts[i]);
+        newCell = newRow.insertCell();
+        newCell.className = 'results_sim_cells';
+        newCell.appendChild(newText);
+        // TODO: actions
+        let est_actions = 0;
+        AddNumberCell(est_actions)
+        // Time
+        newText = document.createTextNode(formatTime(sim_data.attempt_time * est_actions));
+        newCell = newRow.insertCell();
+        newCell.className = 'results_data_cells';
+        newCell.appendChild(newText);
+        // TODO: materials and costs
+        // Note that the valid #est_mats should be equal to #materials
+        let est_mats = [1, 2, 3, 4, 5];
+        let est_coins = 0;
+        let est_protect_count = 0;
+        if (est_mats[0] > 0) { AddNumberCell(est_mats[0]); }
+        if (est_mats[1] > 0) { AddNumberCell(est_mats[1]); }
+        if (est_mats[2] > 0) { AddNumberCell(est_mats[2]); }
+        if (est_mats[3] > 0) { AddNumberCell(est_mats[3]); }
+        if (est_mats[4] > 0) { AddNumberCell(est_mats[4]); }
+        AddNumberCell(est_coins);
+        AddNumberCell(est_protect_count, 2);
+        // Estimated Cost
+        const options = {minimumFractionDigits: 0, maximumFractionDigits: 0};
+        let est_cost = results[perc_vals[i]] + base_price
+        AddNumberCell(est_cost);
+      }
     }
   };
   worker.onerror = function(e) {
     console.error('Error in worker:', e);
-    overlay.style.display = "none";
+    $("#overlay").css("display", "none");
+    alert("An error occurred in the worker: " + e.message);
     worker.terminate();
   };
   for (let i = 0; i < sim_time; i++) {
@@ -475,11 +521,21 @@ function change_item(value, key) {
   $("#r_mat_3_icon > svg > use").attr("xlink:href", "#");
   $("#r_mat_4_icon > svg > use").attr("xlink:href", "#");
   $("#r_mat_5_icon > svg > use").attr("xlink:href", "#");
+  $("#sim_r_mat_1_icon > svg > use").attr("xlink:href", "#");
+  $("#sim_r_mat_2_icon > svg > use").attr("xlink:href", "#");
+  $("#sim_r_mat_3_icon > svg > use").attr("xlink:href", "#");
+  $("#sim_r_mat_4_icon > svg > use").attr("xlink:href", "#");
+  $("#sim_r_mat_5_icon > svg > use").attr("xlink:href", "#");
   $("#r_mat_1_icon").css("display", "none");
   $("#r_mat_2_icon").css("display", "none");
   $("#r_mat_3_icon").css("display", "none");
   $("#r_mat_4_icon").css("display", "none");
   $("#r_mat_5_icon").css("display", "none");
+  $("#sim_r_mat_1_icon").css("display", "none");
+  $("#sim_r_mat_2_icon").css("display", "none");
+  $("#sim_r_mat_3_icon").css("display", "none");
+  $("#sim_r_mat_4_icon").css("display", "none");
+  $("#sim_r_mat_5_icon").css("display", "none");
   $("#prot_3_icon").css("display", "none");
   $("#prot_4_icon").css("display", "none");
   $("#prot_5_icon").css("display", "none");
@@ -504,6 +560,8 @@ function change_item(value, key) {
 			$("#mat_"+(i+1)+"_icon > svg > use").attr("xlink:href", "#"+elm.itemHrid.substring(7))
 			$("#r_mat_"+(i+1)+"_icon > svg > use").attr("xlink:href", "#"+elm.itemHrid.substring(7))
       $("#r_mat_"+(i+1)+"_icon").css("display", "")
+			$("#sim_r_mat_"+(i+1)+"_icon > svg > use").attr("xlink:href", "#"+elm.itemHrid.substring(7))
+      $("#sim_r_mat_"+(i+1)+"_icon").css("display", "")
 			$("#i_mat_"+(i+1)).text(elm.count)
 			sim_data["mat_"+(i+1)] = elm.count
       const final_material_cost = get_full_item_price(elm.itemHrid);
@@ -736,6 +794,10 @@ $(document).ready(function() {
 
   $("#info_btn").on("click", function () {
 		$("#info_menu").css("display", "flex")
+	})
+
+  $("#sim_info_btn").on("click", function () {
+		$("#sim_info_menu").css("display", "flex")
 	})
 
 	$("#item_slot").on("click", ".item_slot_icon", function() {
