@@ -694,7 +694,7 @@ function init_user_data() {
     if(save_data.tea_ultra_enhancing == undefined) save_data.tea_ultra_enhancing = false;
     if(save_data.observatory_level == undefined && save_data.laboratory_level != undefined) save_data.observatory_level = save_data.laboratory_level;
     if(save_data.hide_junk == undefined) save_data.hide_junk = false;
-    if(save_data.emu_time == undefined) save_data.emu_w_aux = 32768;
+    if(save_data.emu_time == undefined) save_data.emu_time = 32768;
     if(save_data.emu_w_aux == undefined) save_data.emu_w_aux = false;
     if(save_data.emu_money == undefined) save_data.emu_money = 0;
 
