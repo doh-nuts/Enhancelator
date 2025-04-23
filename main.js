@@ -52,6 +52,11 @@ save_data = {
 
   hourly_rate: 3000000,
   percent_rate: 2,
+
+  // simulation
+  emu_time: 32768,
+  emu_w_aux: false,
+  emu_money: 0,
 },
 sim_data = {
   item_level: 100,
@@ -238,6 +243,11 @@ function update_values() {
 		sim_data.total_bonus = (1-(0.5*(1-(effective_level) / sim_data.item_level)))+((0.05*save_data.observatory_level)+enhancer_bonus)/100
   $("#o_success_bonus").text(((sim_data.total_bonus - 1.0) * 100).toFixed(2) + "%");
 
+  // Simulation
+  save_data.emu_time = Number($("#i_emu_time").val());
+  save_data.emu_w_aux = Boolean($("#i_emu_w_aux").prop('checked'));
+  save_data.emu_money = Number($("#i_emu_money").val());
+
   // Action time
   const calc_speed = function (item_hrid, level) {
     result = enhancable_items.find((a) => a.hrid == item_hrid).equipmentDetail.noncombatStats.enhancingSpeed * 100 * enhance_bonus[level];
@@ -273,9 +283,7 @@ function validate_field(id, key, value, min, max) {
   if(key in save_data) { save_data[key] = value; }
   if(key in sim_data)  { sim_data [key] = value; }
 
-  if (id != "i_emu_time" && id != "i_emu_money") {
-    update_values();
-  }
+  update_values();
 }
 
 function reset() {
@@ -422,25 +430,31 @@ function sim_enhance(save_data, sim_data) {
   const stop_at = save_data.stop_at;
   const use_blessed = save_data.tea_blessed;
   const base_price = ($("#i_base_price").val() == "") ? Number($("#i_base_price").attr("placeholder")) : Number($("#i_base_price").val());
-  const sort_with_time = $("#i_emu_w_aux").prop('checked');
+  const sort_with_aux = save_data.emu_w_aux;
   const money_i_have = Number($("#i_emu_money").val());
   const worker = new Worker('worker.js');
   let results = [];
   worker.onmessage = function(e) {
     completed_times++;
     const result = e.data;
+    // Add hourly rate to cost
+    result.cost_w_aux = result.cost + 
+      (save_data.hourly_rate * sim_data.attempt_time * result.actions / 3600) * (save_data.percent_rate / 100.0 + 1.0);
     results.push(result);
     updateProgress(completed_times, sim_time);
     if (completed_times == sim_time) {
       $("#overlay").css("display", "none");
       $("#sim_result_wrapper").css("display", "block");
       worker.terminate();
-      if (sort_with_time) {
-        const ratio = save_data.hourly_rate * sim_data.attempt_time / 3600;
-        results.sort((a, b) => (a.cost + a.actions * ratio) - (b.cost + b.actions * ratio));
+      if (sort_with_aux) {
+        results.sort((a, b) => a.cost_w_aux - b.cost_w_aux);
       } else {
         results.sort((a, b) => a.cost - b.cost);
       }
+
+      results_action = results.slice().sort((a, b) => a.actions - b.actions);
+      results_protect = results.slice().sort((a, b) => a.protects - b.protects);
+
       const pt_99 = Math.floor(results.length * 0.99);
       const pt_95 = Math.floor(results.length * 0.95);
       const pt_90 = Math.floor(results.length * 0.9);
@@ -472,48 +486,41 @@ function sim_enhance(save_data, sim_data) {
         newCell = newRow.insertCell();
         newCell.className = 'results_sim_cells';
         newCell.appendChild(newText);
-        // TODO: actions
-        let est_actions = est_result.actions;
+        // Actions
+        let est_actions = results_action[perc_vals[i]].actions;
         AddNumberCell(est_actions)
         // Time
-        newText = document.createTextNode(formatTime(sim_data.attempt_time * est_result.actions));
+        newText = document.createTextNode(formatTime(sim_data.attempt_time * est_actions));
         newCell = newRow.insertCell();
         newCell.className = 'results_data_cells';
         newCell.appendChild(newText);
-        // TODO: materials and costs
+        // Materials and costs
         // Note that the valid #est_mats should be equal to #materials
         let est_mats = [sim_data.mat_1, sim_data.mat_2, sim_data.mat_3, sim_data.mat_4, sim_data.mat_5];
-        let est_coins = est_result.actions * sim_data.coins;
-        let est_protect_count = est_result.protects;
-        if (est_mats[0] > 0) { AddNumberCell(est_mats[0] * est_result.actions); }
-        if (est_mats[1] > 0) { AddNumberCell(est_mats[1] * est_result.actions); }
-        if (est_mats[2] > 0) { AddNumberCell(est_mats[2] * est_result.actions); }
-        if (est_mats[3] > 0) { AddNumberCell(est_mats[3] * est_result.actions); }
-        if (est_mats[4] > 0) { AddNumberCell(est_mats[4] * est_result.actions); }
+        let est_coins = est_actions * sim_data.coins;
+        let est_protect_count = results_protect[perc_vals[i]].protects;
+        if (est_mats[0] > 0) { AddNumberCell(est_mats[0] * est_actions); }
+        if (est_mats[1] > 0) { AddNumberCell(est_mats[1] * est_actions); }
+        if (est_mats[2] > 0) { AddNumberCell(est_mats[2] * est_actions); }
+        if (est_mats[3] > 0) { AddNumberCell(est_mats[3] * est_actions); }
+        if (est_mats[4] > 0) { AddNumberCell(est_mats[4] * est_actions); }
         AddNumberCell(est_coins);
-        AddNumberCell(est_protect_count, 2);
+        AddNumberCell(est_protect_count);
         // Estimated Cost
         AddNumberCell(est_result.cost);
         AddNumberCell(est_result.cost + base_price);
-        AddNumberCell(est_result.cost + base_price + save_data.hourly_rate * sim_data.attempt_time * est_result.actions / 3600);
+        AddNumberCell(est_result.cost_w_aux + base_price);
       }
 
       // If coins i have is not zero, calculate success rate
       if (money_i_have > 0) {
-        let success_rate = 0;
-        if (sort_with_time) {
+        // compare money with Est. Cost, not Est. Total Cost
+        if (sort_with_aux) {
           results.sort((a, b) => a.cost - b.cost);
         }
         const mat_coins = money_i_have - base_price;
-        let n_success = 0
-        if (mat_coins > 0) {
-          for (; n_success < results.length; n_success++) {
-            if (results[n_success].cost > mat_coins) {
-              break;
-            }
-          }
-          success_rate = (n_success / results.length) * 100;
-        }
+        let n_success = results.findIndex((r) => (mat_coins > r.cost));
+        let success_rate = (n_success + 1) / results.length * 100;
         $("#sim_success_rate_pt").text(success_rate.toFixed(2));
         $("#sim_success_rate_coins").text(money_i_have.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0}));
         $("#sim_success_rate_wrapper").css("display", "block");
@@ -687,6 +694,9 @@ function init_user_data() {
     if(save_data.tea_ultra_enhancing == undefined) save_data.tea_ultra_enhancing = false;
     if(save_data.observatory_level == undefined && save_data.laboratory_level != undefined) save_data.observatory_level = save_data.laboratory_level;
     if(save_data.hide_junk == undefined) save_data.hide_junk = false;
+    if(save_data.emu_time == undefined) save_data.emu_w_aux = 32768;
+    if(save_data.emu_w_aux == undefined) save_data.emu_w_aux = false;
+    if(save_data.emu_money == undefined) save_data.emu_money = 0;
 
     // update the UI with the saved values
 		$("#i_enhancing_level").val(save_data.enhancing_level);
@@ -712,6 +722,10 @@ function init_user_data() {
 
     if($("#i_hourly_rate").attr("placeholder") != save_data.hourly_rate) { $("#i_hourly_rate").val(save_data.hourly_rate); }
     if($("#i_percent_rate").attr("placeholder") != save_data.percent_rate) { $("#i_percent_rate").val(save_data.percent_rate); }
+
+    $("#i_emu_time").val(save_data.emu_time);
+    $("#i_emu_w_aux").prop("checked", save_data.emu_w_aux);
+    $("#i_emu_money").val(save_data.emu_money);
 
     i_stop_at.addEventListener('focus', () => i_stop_at.select());
 	}
@@ -823,6 +837,11 @@ $(document).ready(function() {
     save_data.hide_junk = $("#i_hide_junk").prop('checked');
     filter();
     localStorage.setItem("Enhancelator", JSON.stringify(save_data));
+  });
+
+  $("#i_emu_w_aux").on("input", function() {
+    save_data.emu_w_aux = $("#i_emu_w_aux").prop('checked');
+    update_values();
   });
 
   $("#info_btn").on("click", function () {

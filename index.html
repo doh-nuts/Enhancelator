@@ -75,28 +75,44 @@
 		<div>
       <div class="close btn" onclick="$('#sim_info_menu').css('display','none')"><p>&#10005;</p></div>
       <section>
-        <h3>How to use</h3>
+        <h2>How to use</h2>
         <ul>
           <li>Fill in number of simulation samples (# Simulation)</li>
           <li>Click the "Simulate" button at specific Prot. level</li>
           <li>Simulated data for the data row will be shown</li>
         </ul>
+        <p>
+        If the "Sort w/ Aux" is checked, the estimated cost will be sorted including the Hourly Rate and the % Rate.
+        </p>
       </section>
       <br />
       <section>
-        <h3>Metrics Explained</h3>
+        <h2>Metrics Explained</h2>
         <p>
-          <b>Success Rate: </b>The data is shown using different percentile of success rate. 
+          <b><u>Success Rate: </u></b>The data is shown using different percentile of success rate. 
           For example, a 50% success rate means that 50% of the attempts will succeed with the estimated costs.
         </p>
+        <br />
         <p>
-          <b>Metrics with *: </b>The estimated costs of certain items at specific success rate. 
+          <b><u>Metrics with *: </u></b>The estimated costs of certain items at specific success rate. 
           Note that this is the percentile data for certain items, which is kinda unrelated to the Est. Cost.
-          However, this data is a good sign for the user to determine the usage of certain items to some degree.
+          However, this data is a good reference for the user to determine the usage of certain items to some degree.
         </p>
+        <br />
         <p>
-          <b>Est. Cost: </b>The estimated cost at different success rate. 
-          If the "Sort w/ Aux" is checked, the estimated cost will be sorted including the Hourly Rate and the % Rate.
+          <b><u>Est. Mat Cost: </u></b>The estimated material cost at different success rates. 
+        </p>
+        <br />
+        <p>
+          <b><u>Est. Cost: </u></b>The estimated cost at different success rates. 
+        </p>
+        <br />
+        <p>
+          <b><u>Est. Total Cost: </u></b>The estimated cost at different success rates, including Hourly Rate and % Rate. 
+        </p>
+        <br />
+        <p>
+          <b><u>Success Rate with Coins: </u></b>The success rate with specific coins based on the Est. Cost.
         </p>
       </section>
 		</div>
@@ -291,7 +307,7 @@
                 <td id="base_icon" class="mat_icon">
                   <svg><use xlink:href="#"></use></svg>
                 </td>
-                <td/>
+                <td></td>
                 <td><input id="i_base_price" type="number" min="0" max="10000000000" value="0" placeholder="400"></td>
               </tr>
               <tr><td colspan="3"><div class="top_divider"></div></td></tr>
