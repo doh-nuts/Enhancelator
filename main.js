@@ -393,20 +393,30 @@ function reset_results() {
     AddNumberCell(result.protect_count, 2);
     AddNumberCell(result.mat_cost);
     AddNumberCell(result.ttl_cost);
-    // simulation
-    $("#sim_result_wrapper").css("display", "none");
-    let sim_btn = document.createElement("button");
-    sim_btn.className = 'sim_btn';
-    let sim_data_tmp = structuredClone(sim_data);
-    sim_data_tmp.protect_at = protect_at;
-    sim_btn.onclick = function() {
-      sim_enhance(save_data, sim_data_tmp); 
-    };
-    sim_btn.innerText = "Simulate";
-    newCell = newRow.insertCell();
-    newCell.className = 'results_sim_cells';
-    newCell.appendChild(sim_btn);
   }
+
+  // Simulation
+  // Find protection level that matches minimum total cost
+  const min_cost_result = all_results.findIndex(result => result.ttl_cost === min_ttl_cost);
+  const optimal_prot = min_cost_result >= 0 ? min_cost_result + 2 : 0; // Add 2 since prot levels start at 2
+
+  $("#sim_result_wrapper").css("display", "none");
+
+  // Clear existing options
+  $("#i_emu_prot").empty();
+  // Add options from 2 to stop_at
+  for (let i = 2; i <= save_data.stop_at; i++) {
+    const option = $("<option></option>").val(i).text(i);
+    $("#i_emu_prot").append(option);
+  }
+
+  // Set optimal protection level
+  $("#i_emu_prot").val(optimal_prot);
+  $("#sim_btn").on("click", function() {
+    let sim_data_tmp = structuredClone(sim_data);
+    sim_data_tmp.protect_at = parseInt($("#i_emu_prot").val());
+    sim_enhance(save_data, sim_data_tmp);
+  });
 
   var decompElement = document.getElementById('decomp');
   const essenceCount = Math.floor(Math.round(2.0 * (0.5 + 0.1*Math.pow(1.05, Number(sim_data.item_level))) * Math.pow(2, Number(save_data.stop_at))));

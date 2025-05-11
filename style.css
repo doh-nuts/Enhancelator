@@ -310,13 +310,23 @@ ul {
 	overflow-x: auto;
 }
 
+#sim_wrapper {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: fit-content;
+	padding: 1% 0%;
+	border-top: 1px solid #98a7e9;
+}
+
+
 #sim_result_wrapper {
 	position: relative;
 	display: block;
 	width: 100%;
 	height: fit-content;
-	padding: 1% 0%;
-	border-top: 1px solid #98a7e9;
 }
 
 #sim_result_wrapper > h1 {
@@ -448,20 +458,25 @@ input[type=number]::-webkit-inner-spin-button {
 /* sim button */
 .sim_btn {
   appearance: none;
-  background-color: #FAFBFC;
-  border: 1px solid rgba(27, 31, 35, 0.15);
-  border-radius: 6px;
-  box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0, rgba(255, 255, 255, 0.25) 0 1px 0 inset;
+  background: linear-gradient(180deg, #FAFBFC 0%, #F3F4F6 100%);
+  border: 2px solid rgba(27, 31, 35, 0.15);
+  border-radius: 8px;
+  box-shadow: 
+    rgba(27, 31, 35, 0.1) 0 2px 4px,
+    rgba(255, 255, 255, 0.4) 0 1px 0 inset;
   box-sizing: border-box;
   color: #24292E;
   cursor: pointer;
   display: inline-block;
   font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.5px;
   list-style: none;
-  padding: 3px;
+  margin: 8px 0;
+  padding: 6px 12px;
   position: relative;
-  transition: background-color 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: all 0.2s cubic-bezier(0.3, 0, 0.5, 1);
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
