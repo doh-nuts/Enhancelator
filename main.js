@@ -412,7 +412,7 @@ function reset_results() {
 
   // Set optimal protection level
   $("#i_emu_prot").val(optimal_prot);
-  $("#sim_btn").on("click", function() {
+  $("#sim_btn").off("click").on("click", function() {
     let sim_data_tmp = structuredClone(sim_data);
     sim_data_tmp.protect_at = parseInt($("#i_emu_prot").val());
     sim_enhance(save_data, sim_data_tmp);
