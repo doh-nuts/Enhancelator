@@ -36,10 +36,16 @@ save_data = {
   use_guzzling: false,
   use_enhancer_top: false,
   use_enhancer_bot: false,
+  use_philo_neck: false,
+  use_enhancing_buff: false,
+  use_experience_buff: false,
   enchanted_level: 0,
   guzzling_level: 0,
   enhancer_top_level: 0,
   enhancer_bot_level: 0,
+  philo_neck_level: 0,
+  enhancing_buff_level: 1,
+  experience_buff_level: 1,
 
   tea_enhancing: false,
   tea_super_enhancing: false,
@@ -144,7 +150,6 @@ function Enhancelate(save_data, sim_data)
   }
   markov.set([save_data.stop_at, save_data.stop_at], 1.0);
 
-  
   let Q = markov.subset(math.index(math.range(0, save_data.stop_at), math.range(0, save_data.stop_at)));
   const M = math.inv(math.subtract(math.identity(save_data.stop_at), Q));
   const attemptsArray = M.subset(math.index(math.range(0, 1), math.range(0, save_data.stop_at)));
@@ -155,11 +160,26 @@ function Enhancelate(save_data, sim_data)
      math.flatten(math.row(protectAttempts, 0).valueOf());
   const protects = protectAttemptsArray.map((a, i) => a * markov.get([i + sim_data.protect_at, i + sim_data.protect_at - 1])).reduce((a, b) => a + b, 0);
   const exp = math.flatten(math.row(attemptsArray, 0).valueOf()).reduce((acc, a, i) => {
-    key = "/items/" + save_data.selected_enhancer.substring(4);
+    enhancerKey = "/items/" + save_data.selected_enhancer.substring(4);
     save_data.enhancer_level = Number($("#i_enhancer_level").val());
-    baseEnhancingExperience = enhancable_items.find((a) => a.hrid == key).equipmentDetail.noncombatStats.enhancingExperience;
+    save_data.enhancer_bot_level = Number($("#i_enhancer_bot_level").val());
+    //enhancer
+    baseEnhancingExperience = enhancable_items.find((a) => a.hrid == enhancerKey).equipmentDetail.noncombatStats.enhancingExperience;
     enhancingExperience = baseEnhancingExperience == undefined ? 0.0 : baseEnhancingExperience * enhance_bonus[save_data.enhancer_level];
-    exp_bonus = (save_data.tea_wisdom ? 0.12*guzzling_bonus : 0.00) + (enhancingExperience == undefined ? 0.00 : enhancingExperience);
+    //enhancers bottoms
+    baseEnhancer_botExperience = enhancable_items.find((a) => a.hrid == "/items/enhancers_bottoms").equipmentDetail.noncombatStats.enhancingExperience;
+    enhancer_botExperience = save_data.use_enhancer_bot ? baseEnhancer_botExperience == undefined ? 0.0 : baseEnhancer_botExperience * enhance_bonus[save_data.enhancer_bot_level]: 0;
+    //philo neck
+    basephilo_neckExperience = enhancable_items.find((a) => a.hrid == "/items/philosophers_necklace").equipmentDetail.noncombatStats.skillingExperience;
+    philo_neckExperience = save_data.use_philo_neck ? basephilo_neckExperience == undefined ? 0.0 : basephilo_neckExperience * (((enhance_bonus[save_data.philo_neck_level]-1)*5)+1): 0;
+    //community exp buff
+    exp_buff_effect = save_data.use_experience_buff ? 0.195+save_data.experience_buff_level*0.005 : 0
+    //total exp bonus
+    exp_bonus = (save_data.tea_wisdom ? 0.12*guzzling_bonus : 0.00) +
+        (enhancingExperience == undefined ? 0.00 : enhancingExperience) +
+        (enhancer_botExperience == undefined ? 0.00 : enhancer_botExperience) +
+        (philo_neckExperience == undefined ? 0.00 : philo_neckExperience) +
+        exp_buff_effect;
     return acc + (a * success_chances[i] + a * 0.1 * (1 - success_chances[i])) * (1 + exp_bonus) * (cal_exp(sim_data.item_level, i));
   }, 0);
   
@@ -251,12 +271,18 @@ function update_values(recalculate = true) {
 
   // Action time
   const calc_speed = function (item_hrid, level) {
-    result = enhancable_items.find((a) => a.hrid == item_hrid).equipmentDetail.noncombatStats.enhancingSpeed * 100 * enhance_bonus[level];
+    if(item_hrid != "/items/philosophers_necklace")
+      result = enhancable_items.find((a) => a.hrid == item_hrid).equipmentDetail.noncombatStats.enhancingSpeed * 100 * enhance_bonus[level];
+    else
+      result = enhancable_items.find((a) => a.hrid == item_hrid).equipmentDetail.noncombatStats.skillingSpeed * 100 * (((enhance_bonus[level]-1)*5)+1);
     return Number(result.toFixed(2));
   };
   item_bonus = (save_data.use_enchanted ? calc_speed("/items/enchanted_gloves", save_data.enchanted_level) : 0.0) + 
                (save_data.use_enhancer_top ? calc_speed("/items/enhancers_top", save_data.enhancer_top_level) : 0.0) +
-               (save_data.use_enhancer_bot ? calc_speed("/items/enhancers_bottoms", save_data.enhancer_bot_level) : 0.0);
+               (save_data.use_enhancer_bot ? calc_speed("/items/enhancers_bottoms", save_data.enhancer_bot_level) : 0.0) +
+               (save_data.use_philo_neck ? calc_speed("/items/philosophers_necklace", save_data.philo_neck_level) : 0.0) +
+               (save_data.use_enhancing_buff ?  19.5+(save_data.enhancing_buff_level*0.5): 0.0);
+
 	temp = (12/(1+(save_data.enhancing_level>sim_data.item_level ? ((effective_level+save_data.observatory_level-sim_data.item_level)+item_bonus+tea_speed_bonus)/100 : (save_data.observatory_level+item_bonus+tea_speed_bonus)/100))).toFixed(2)
 	sim_data.attempt_time = Number(temp)
 	localStorage.setItem("Enhancelator", JSON.stringify(save_data))
@@ -717,6 +743,12 @@ function init_user_data() {
     if(save_data.use_enhancer_top == undefined) save_data.use_enhancer_top = false;
     if(save_data.enhancer_bot_level == undefined) save_data.enhancer_bot_level = 0;
     if(save_data.use_enhancer_bot == undefined) save_data.use_enhancer_bot = false;
+    if(save_data.use_philo_neck == undefined) save_data.use_philo_neck = false;
+    if(save_data.philo_neck_level == undefined) save_data.philo_neck_level = 0;
+    if(save_data.use_enhancing_buff == undefined) save_data.use_enhancing_buff = false;
+    if(save_data.enhancing_buff_level == undefined) save_data.enhancing_buff_level = 0;
+    if(save_data.use_experience_buff == undefined) save_data.use_experience_buff = false;
+    if(save_data.experience_buff_level == undefined) save_data.experience_buff_level = 0;
     if(save_data.tea_ultra_enhancing == undefined) save_data.tea_ultra_enhancing = false;
     if(save_data.observatory_level == undefined && save_data.laboratory_level != undefined) save_data.observatory_level = save_data.laboratory_level;
     if(save_data.hide_junk == undefined) save_data.hide_junk = false;
@@ -732,10 +764,16 @@ function init_user_data() {
     $("#i_use_guzzling").prop("checked", save_data.use_guzzling)
     $("#i_use_enhancer_top").prop("checked", save_data.use_enhancer_top)
     $("#i_use_enhancer_bot").prop("checked", save_data.use_enhancer_bot)
+    $("#i_use_philo_neck").prop("checked", save_data.use_philo_neck)
+    $("#i_use_enhancing_buff").prop("checked", save_data.use_enhancing_buff)
+    $("#i_use_experience_buff").prop("checked", save_data.use_experience_buff)
 		$("#i_enchanted_level").val(save_data.enchanted_level);
     $("#i_guzzling_level").val(save_data.guzzling_level);
     $("#i_enhancer_top_level").val(save_data.enhancer_top_level);
     $("#i_enhancer_bot_level").val(save_data.enhancer_bot_level);
+    $("#i_philo_neck_level").val(save_data.philo_neck_level);
+    $("#i_enhancing_buff_level").val(save_data.enhancing_buff_level);
+    $("#i_experience_buff_level").val(save_data.experience_buff_level);
     $("#i_hide_junk").prop("checked", save_data.hide_junk);
 
     if(save_data.tea_enhancing)       { $("#tea_enhancing").attr("class", "btn_icon_selected"); }
@@ -857,6 +895,18 @@ $(document).ready(function() {
   })
   $("#i_use_enhancer_bot").on("input", function() {
     save_data.use_enhancer_bot = $("#i_use_enhancer_bot").prop('checked')
+    update_values()
+  })
+  $("#i_use_philo_neck").on("input", function() {
+    save_data.use_philo_neck = $("#i_use_philo_neck").prop('checked')
+    update_values()
+  })
+  $("#i_use_enhancing_buff").on("input", function() {
+    save_data.use_enhancing_buff = $("#i_use_enhancing_buff").prop('checked')
+    update_values()
+  })
+  $("#i_use_experience_buff").on("input", function() {
+    save_data.use_experience_buff = $("#i_use_experience_buff").prop('checked')
     update_values()
   })
   $("#i_hide_junk").on("input", function() {

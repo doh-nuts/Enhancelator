@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Enhancelator</title>
-	<link rel="icon" type="image/svg" href="holy_enhancer.svg"/>
+	<link rel="icon" type="image/svg" href="celestial_enhancer.svg"/>
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script>
@@ -46,9 +46,9 @@
         <br>
         The result will be displayed in a table, the shown result values are average values, given the nature of enhancing, the item might cost less than what represented or might cost x10 more!
         <br><br>
-        <b>What are Enchanted Gloves, Guzzling Pouch, Enhancer's Top/Bottoms?</b>
+        <b>What are all these items and buffs?</b>
         <br>
-        The Checkbox is whether to take into account the item's effect or not, and the field is for its enhancement level
+        The Checkbox is whether to take into account the item/buff's effect or not, and the field is for its enhancement/buff level
         <br><br>
         <b>What is Hourly Rate?</b>
         <br>
@@ -166,6 +166,22 @@
             <td align="center"><input id="i_use_enhancer_bot" type="checkbox" class="enhancer_stats_check_box"></td>
             <td align="right"><input id="i_enhancer_bot_level" type="number" min="0" max="20" placeholder="0"></td>
           </tr>
+          <tr>
+            <td><p>Philosopher's Necklace</p></td>
+            <td align="center"><input id="i_use_philo_neck" type="checkbox" class="enhancer_stats_check_box"></td>
+            <td align="right"><input id="i_philo_neck_level" type="number" min="0" max="20" placeholder="0"></td>
+          </tr>
+           <tr><td colspan="3"><div class="top_divider"></div></td></tr>
+          <tr>
+            <td><p>Enhancing buff</p></td>
+            <td align="center"><input id="i_use_enhancing_buff" type="checkbox" class="enhancer_stats_check_box"></td>
+            <td align="right"><input id="i_enhancing_buff_level" type="number" min="1" max="20" placeholder="1"></td>
+          </tr>
+          <tr>
+            <td><p>Experience buff</p></td>
+            <td align="center"><input id="i_use_experience_buff" type="checkbox" class="enhancer_stats_check_box"></td>
+            <td align="right"><input id="i_experience_buff_level" type="number" min="1" max="20" placeholder="1"></td>
+          </tr>
           <tr><td colspan="3"><div class="top_divider"></div></td></tr>
           <tr>
             <td><p>Enhancer Level</p></td>
@@ -220,15 +236,6 @@
               </button>
             </td>
           </tr>
-          <tr><td colspan="3"><div class="top_divider"></div></td></tr>
-          <tr>
-            <td colspan="2"><p>Hourly Rate:</p></td>
-            <td align="right"><input id="i_hourly_rate" type="number" min="0" max="100000000" placeholder="5000000"></td>
-          </tr>
-          <tr>
-            <td colspan="2"><p>% Rate:</p></td>
-            <td align="right"><input id="i_percent_rate" type="number" min="0" max="20" placeholder="2"></td>
-          </tr>
         </table>
       </div>
       <div id="item_slot" class="item_slot">
@@ -239,48 +246,56 @@
       <div id="item_stats" class="item_stats">
         <div id="material_stats">
           <table>
-            <thead>
-              <tr>
-                <th style="padding: 0px 5px 0px 2px">Item</th>
-                <th style="padding: 0px 5px 0px 2px">Count</th>
-                <th style="padding: 0px 5px 0px 2px">Price</th>
-              </tr>
-            </thead>
             <tbody style="display: table-header-group">
+              <tr>
+                <td colspan="2"><p>Hourly Rate:</p></td>
+                <td align="right"><input id="i_hourly_rate" type="number" min="0" max="100000000000" placeholder="5000000"></td>
+              </tr>
+              <tr>
+                <td colspan="2"><p>% Rate:</p></td>
+                <td align="right"><input id="i_percent_rate" type="number" min="0" max="100" placeholder="2"></td>
+              </tr>
+              <tr><td colspan="3"><div class="top_divider"></div></td></tr>
+              
+                <tr>
+                  <td style="padding: 0px 5px 0px 2px; font-weight: bold; text-align: center;">Item</td>
+                  <td style="padding: 0px 5px 0px 2px; font-weight: bold; text-align: center;">Count</td>
+                  <td style="padding: 0px 5px 0px 2px; font-weight: bold; text-align: center;">Price</td>
+                </tr>
               <tr id="mat_1_cell">
                 <td id="mat_1_icon" class="mat_icon">
                   <svg><use xlink:href="#"></use></svg>
                 </td>
                 <td><p id="i_mat_1" align="right" style="padding: 0px 5px 0px 2px"></p></td>
-                <td><input id="i_prc_1" type="number" min="0" max="100000000" value="0" placeholder="400"></td>
+                <td><input id="i_prc_1" type="number" min="0" max="100000000000" value="0" placeholder="400"></td>
               </tr>
               <tr id="mat_2_cell">
                 <td id="mat_2_icon" class="mat_icon">
                   <svg><use xlink:href="#"></use></svg>
                 </td>
                 <td><p id="i_mat_2" align="right" style="padding: 0px 5px 0px 2px"></p></td>
-                <td><input id="i_prc_2" type="number" min="0" max="100000000" value="0" placeholder="400"></td>
+                <td><input id="i_prc_2" type="number" min="0" max="100000000000" value="0" placeholder="400"></td>
               </tr>
               <tr id="mat_3_cell">
                 <td id="mat_3_icon" class="mat_icon">
                   <svg><use xlink:href="#"></use></svg>
                 </td>
                 <td><p id="i_mat_3"align="right" style="padding: 0px 5px 0px 2px"></p></td>
-                <td><input id="i_prc_3" type="number" min="0" max="100000000" value="0" placeholder="400"></td>
+                <td><input id="i_prc_3" type="number" min="0" max="100000000000" value="0" placeholder="400"></td>
               </tr>
               <tr id="mat_4_cell">
                 <td id="mat_4_icon" class="mat_icon">
                   <svg><use xlink:href="#"></use></svg>
                 </td>
                 <td><p id="i_mat_4" align="right" style="padding: 0px 5px 0px 2px"></p></td>
-                <td><input id="i_prc_4" type="number" min="0" max="100000000" value="0" placeholder="400"></td>
+                <td><input id="i_prc_4" type="number" min="0" max="100000000000" value="0" placeholder="400"></td>
               </tr>
               <tr id="mat_5_cell">
                 <td id="mat_5_icon" class="mat_icon">
                   <svg><use xlink:href="#"></use></svg>
                 </td>
                 <td><p id="i_mat_5" align="right" style="padding: 0px 5px 0px 2px"></p></td>
-                <td><input id="i_prc_5" type="number" min="0" max="100000000" value="0" placeholder="400"></td>
+                <td><input id="i_prc_5" type="number" min="0" max="100000000000" value="0" placeholder="400"></td>
               </tr>
               <tr>
                 <td id="coin_icon" class="mat_icon">
@@ -308,14 +323,14 @@
                     <svg><use xlink:href="#coin"></use></svg>
                   </div>
                 </td>
-                <td><input type="number" min="0" max="1000000000" value="0" id="i_protect_price" placeholder="400"></td>
+                <td><input type="number" min="0" max="100000000000" value="0" id="i_protect_price" placeholder="400"></td>
               </tr>
               <tr>
                 <td id="base_icon" class="mat_icon">
                   <svg><use xlink:href="#"></use></svg>
                 </td>
                 <td></td>
-                <td><input id="i_base_price" type="number" min="0" max="10000000000" value="0" placeholder="400"></td>
+                <td><input id="i_base_price" type="number" min="0" max="100000000000" value="0" placeholder="400"></td>
               </tr>
               <tr><td colspan="3"><div class="top_divider"></div></td></tr>
               <tr>
