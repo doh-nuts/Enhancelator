@@ -219,13 +219,16 @@ function get_full_item_price(hrid) {
 
   if(is_base_item)
   {
-    const fullName = game_data.itemDetailMap[hrid].name;
-    const item_price_data = price_data.market[fullName];
-    if(item_price_data == undefined)
-    {
-      return 0;
-    }
-    final_cost = (item_price_data.ask + item_price_data.bid) / 2.0;
+    const enhanced_price_data = price_data.marketData[hrid];
+    if(enhanced_price_data == undefined) { return 0; }
+
+    const item_price_data = enhanced_price_data[0];
+    if(item_price_data == undefined) { return 0; }
+
+    const ask = item_price_data.a == -1 ? item_price_data.b : item_price_data.a;
+    const bid = item_price_data.b == -1 ? item_price_data.a : item_price_data.b;
+    final_cost = (ask + bid) / 2.0;
+    if(final_cost == -1.0) { final_cost = 0; }
   }
 
   return final_cost;
@@ -720,7 +723,7 @@ function filter() {
   {
     enhancable_items.forEach(function(item) {
       key = item.hrid.substring(7);
-      junk_keywords = ["cheese", "verdant", "azure", "burble", "crimson", "rainbow",
+      junk_keywords = ["cheese_", "verdant", "azure", "burble", "crimson", "rainbow",
         "wooden", "birch", "cedar", "purpleheart", "ginkgo", "redwood", "arcane",
         "rough", "reptile", "gobo", "beast", "umbral",
         "cotton", "linen", "bamboo", "silk", "radiant",
@@ -851,7 +854,7 @@ $(document).ready(function() {
 	window.scrollTo(0, 1)
   
   const pricesRequest = new XMLHttpRequest();
-  pricesRequest.open("GET", "https://holychikenz.github.io/MWIApi/milkyapi.json", false);
+  pricesRequest.open("GET", "https://www.milkywayidle.com/game_data/marketplace.json", false);
   pricesRequest.send(null);
   price_data = JSON.parse(pricesRequest.responseText);
 
