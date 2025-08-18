@@ -5,27 +5,27 @@ Obviously i do not own the game nor any art assets in the this projects
 
 var worker = "",
 enhance_bonus = [
-	1, // +0
-	1.02, // +1
+	1.000, // +0
+	1.020, // +1
 	1.042, // +2
 	1.066, // +3
 	1.092, // +4
-	1.12, // +5
-	1.15, // +6
+	1.120, // +5
+	1.150, // +6
 	1.182, // +7
 	1.216, // +8
 	1.252, // +9
-	1.29, // +10
-	1.33, // +11
-	1.372, // +12
-	1.416, // +13
-	1.462, // +14
-	1.51, // +15
-	1.56, // +16
-	1.612, // +17
-	1.666, // +18
-	1.722, // +19
-	1.78 // +20
+	1.290, // +10
+	1.334, // +11
+	1.384, // +12
+	1.440, // +13
+	1.502, // +14
+	1.570, // +15
+	1.644, // +16
+	1.724, // +17
+	1.810, // +18
+	1.902, // +19
+	2.000, // +20
 ],
 save_data = {
   enhancing_level: 100,
@@ -219,16 +219,20 @@ function get_full_item_price(hrid) {
 
   if(is_base_item)
   {
+    const vendor = game_data.itemDetailMap[hrid].sellPrice;
+    // hacka wacka wacka for trainee charms
+    if(hrid.includes("trainee") && hrid.includes("charm")) { return 250000; }
+
     const enhanced_price_data = price_data.marketData[hrid];
-    if(enhanced_price_data == undefined) { return 0; }
+    if(enhanced_price_data == undefined) { return vendor; }
 
     const item_price_data = enhanced_price_data[0];
-    if(item_price_data == undefined) { return 0; }
+    if(item_price_data == undefined) { return vendor; }
 
     const ask = item_price_data.a == -1 ? item_price_data.b : item_price_data.a;
     const bid = item_price_data.b == -1 ? item_price_data.a : item_price_data.b;
     final_cost = (ask + bid) / 2.0;
-    if(final_cost == -1.0) { final_cost = 0; }
+    if(final_cost == -1.0) { final_cost = vendor; }
   }
 
   return final_cost;
@@ -733,6 +737,14 @@ function filter() {
         $("#"+key+"_list").css("display", "none")
     })
   }
+  if(save_data.hide_charms)
+  {
+    enhancable_items.forEach(function(item) {
+      key = item.hrid.substring(7);
+      if(key.includes("charm"))
+        $("#"+key+"_list").css("display", "none")
+    })
+  }
 }
 
 function init_user_data() {
@@ -755,6 +767,7 @@ function init_user_data() {
     if(save_data.tea_ultra_enhancing == undefined) save_data.tea_ultra_enhancing = false;
     if(save_data.observatory_level == undefined && save_data.laboratory_level != undefined) save_data.observatory_level = save_data.laboratory_level;
     if(save_data.hide_junk == undefined) save_data.hide_junk = false;
+    if(save_data.hide_charms == undefined) save_data.hide_charms = false;
     if(save_data.emu_time == undefined) save_data.emu_time = 32768;
     if(save_data.emu_w_aux == undefined) save_data.emu_w_aux = false;
     if(save_data.emu_money == undefined) save_data.emu_money = 0;
@@ -778,6 +791,7 @@ function init_user_data() {
     $("#i_enhancing_buff_level").val(save_data.enhancing_buff_level);
     $("#i_experience_buff_level").val(save_data.experience_buff_level);
     $("#i_hide_junk").prop("checked", save_data.hide_junk);
+    $("#i_hide_charms").prop("checked", save_data.hide_charms);
 
     if(save_data.tea_enhancing)       { $("#tea_enhancing").attr("class", "btn_icon_selected"); }
     if(save_data.tea_super_enhancing) { $("#tea_super_enhancing").attr("class", "btn_icon_selected"); }
@@ -865,7 +879,7 @@ $(document).ready(function() {
 
 	//generte items list
   enhancable_items = Object.entries(game_data.itemDetailMap).reduce((acc, cur) => {
-    if(cur[1].enhancementCosts != null) { acc.push(cur[1]); }
+    if(cur[1].enhancementCosts != null && !cur[1].name.includes("(R)")) { acc.push(cur[1]); }
     return acc;
   }, []).sort((a, b) => a.sortIndex - b.sortIndex);
 
@@ -914,6 +928,11 @@ $(document).ready(function() {
   })
   $("#i_hide_junk").on("input", function() {
     save_data.hide_junk = $("#i_hide_junk").prop('checked');
+    filter();
+    localStorage.setItem("Enhancelator", JSON.stringify(save_data));
+  });
+  $("#i_hide_charms").on("input", function() {
+    save_data.hide_charms = $("#i_hide_charms").prop('checked');
     filter();
     localStorage.setItem("Enhancelator", JSON.stringify(save_data));
   });

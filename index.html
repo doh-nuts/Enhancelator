@@ -125,9 +125,13 @@
 		</div>
 	</div>
   <div id="sel_item_container" class="sel_item_container">
-    <p class="sel_item_text">Hide Junk: </p>
-    <input id="i_hide_junk" type="checkbox" class="sel_item_hide_junk_checkbox">
-    <div class="close btn" onclick="$('#sel_item_container').css('display','none')"><p>&#10005;</p></div>
+    <div style="display:flex">
+      <p>Hide Junk: </p>
+      <input id="i_hide_junk" type="checkbox" class="sel_item_hide_items_checkbox">
+      <p>Hide Charms: </p>
+      <input id="i_hide_charms" type="checkbox" class="sel_item_hide_items_checkbox">
+      <div class="close btn" onclick="$('#sel_item_container').css('display','none')"><p>&#10005;</p></div>
+    </div>
     <input id="item_filter" type="text" class="sel_item_filter" placeholder="Item Filter">
     <div id="sel_item" class="sel_item_icons"></div>
   </div>
