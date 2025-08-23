@@ -192,7 +192,7 @@ function Enhancelate(save_data, sim_data)
 }
 
 function get_full_item_price(hrid) {
-  final_cost = 0;
+  let final_cost = 0;
   let is_base_item = true;
 
   if(hrid == "/items/coin")
@@ -208,7 +208,11 @@ function get_full_item_price(hrid) {
     if(!is_base_item)
     {
       action.inputItems.forEach((item) => {
-        final_cost += item.count * get_full_item_price(item.itemHrid);
+        inputItemCost = item.count * get_full_item_price(item.itemHrid);
+        // Only charms. The rest get padded to compensate for bases fluctuating in price so much.
+        // No guzzling. Need that padding for base items otherwise enhancers risk losing tons of money on small price changes.
+        if(hrid.includes("charm")) { inputItemCost *= 0.90; }
+        final_cost += inputItemCost;
       });
       if(action.upgradeItemHrid != "")
       {
