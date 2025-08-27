@@ -175,6 +175,33 @@
             <td align="center"><input id="i_use_philo_neck" type="checkbox" class="enhancer_stats_check_box"></td>
             <td align="right"><input id="i_philo_neck_level" type="number" min="0" max="20" placeholder="0"></td>
           </tr>
+          <tr>
+            <td><p>Enhancing Charm</p></td>
+            <td align="center"><input id="i_use_charm" type="checkbox" class="enhancer_stats_check_box"></td>
+            <td align="right"><input id="i_charm_level" type="number" min="0" max="20" placeholder="0"></td>
+          </tr>
+          <tr id="charm_grid_row" style="display: none;">
+            <td colspan="3">
+              <button id="btn_charm_trainee" class="btn_icon charm_btn" onclick="charm_selection(this)" title="Trainee Enhancing Charm">
+                <svg><use xlink:href="#trainee_enhancing_charm"></use></svg>
+              </button>
+              <button id="btn_charm_basic" class="btn_icon charm_btn" onclick="charm_selection(this)" title="Basic Enhancing Charm">
+                <svg><use xlink:href="#basic_enhancing_charm"></use></svg>
+              </button>
+              <button id="btn_charm_advanced" class="btn_icon charm_btn" onclick="charm_selection(this)" title="Advanced Enhancing Charm">
+                <svg><use xlink:href="#advanced_enhancing_charm"></use></svg>
+              </button>
+              <button id="btn_charm_expert" class="btn_icon charm_btn" onclick="charm_selection(this)" title="Expert Enhancing Charm">
+                <svg><use xlink:href="#expert_enhancing_charm"></use></svg>
+              </button>
+              <button id="btn_charm_master" class="btn_icon charm_btn" onclick="charm_selection(this)" title="Master Enhancing Charm">
+                <svg><use xlink:href="#master_enhancing_charm"></use></svg>
+              </button>
+              <button id="btn_charm_grandmaster" class="btn_icon charm_btn" onclick="charm_selection(this)" title="Grandmaster Enhancing Charm">
+                <svg><use xlink:href="#grandmaster_enhancing_charm"></use></svg>
+              </button>
+            </td>
+          </tr>
            <tr><td colspan="3"><div class="top_divider"></div></td></tr>
           <tr>
             <td><p>Enhancing buff</p></td>

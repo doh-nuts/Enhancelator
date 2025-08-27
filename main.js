@@ -37,6 +37,7 @@ save_data = {
   use_enhancer_top: false,
   use_enhancer_bot: false,
   use_philo_neck: false,
+  use_charm: false,
   use_enhancing_buff: false,
   use_experience_buff: false,
   enchanted_level: 0,
@@ -44,6 +45,8 @@ save_data = {
   enhancer_top_level: 0,
   enhancer_bot_level: 0,
   philo_neck_level: 0,
+  charm_level: 0,
+  charm_tier: "trainee",
   enhancing_buff_level: 1,
   experience_buff_level: 1,
 
@@ -172,6 +175,10 @@ function Enhancelate(save_data, sim_data)
     //philo neck
     basephilo_neckExperience = enhancable_items.find((a) => a.hrid == "/items/philosophers_necklace").equipmentDetail.noncombatStats.skillingExperience;
     philo_neckExperience = save_data.use_philo_neck ? basephilo_neckExperience == undefined ? 0.0 : basephilo_neckExperience * (((enhance_bonus[save_data.philo_neck_level]-1)*5)+1): 0;
+    //enhancing charm (additive like philosopher), dynamic base % from game data with 5x enhance scaling
+    charmKey = "/items/" + save_data.charm_tier + "_enhancing_charm";
+    baseCharmExperience = enhancable_items.find((a) => a.hrid == charmKey).equipmentDetail.noncombatStats.enhancingExperience;
+    charmExperience = save_data.use_charm ? (baseCharmExperience == undefined ? 0.0 : baseCharmExperience * (((enhance_bonus[save_data.charm_level]-1)*5)+1)) : 0;
     //community exp buff
     exp_buff_effect = save_data.use_experience_buff ? 0.195+save_data.experience_buff_level*0.005 : 0
     //total exp bonus
@@ -179,6 +186,7 @@ function Enhancelate(save_data, sim_data)
         (enhancingExperience == undefined ? 0.00 : enhancingExperience) +
         (enhancer_botExperience == undefined ? 0.00 : enhancer_botExperience) +
         (philo_neckExperience == undefined ? 0.00 : philo_neckExperience) +
+        charmExperience +
         exp_buff_effect;
     return acc + (a * success_chances[i] + a * 0.1 * (1 - success_chances[i])) * (1 + exp_bonus) * (cal_exp(sim_data.item_level, i));
   }, 0);
@@ -822,6 +830,9 @@ function init_user_data() {
     if(save_data.emu_w_aux == undefined) save_data.emu_w_aux = false;
     if(save_data.emu_money == undefined) save_data.emu_money = 0;
     if(save_data.favorites == undefined) save_data.favorites = [];
+    if(save_data.use_charm == undefined) save_data.use_charm = false;
+    if(save_data.charm_level == undefined) save_data.charm_level = 0;
+    if(save_data.charm_tier == undefined) save_data.charm_tier = "trainee";
 
     // update the UI with the saved values
 		$("#i_enhancing_level").val(save_data.enhancing_level);
@@ -834,11 +845,13 @@ function init_user_data() {
     $("#i_use_philo_neck").prop("checked", save_data.use_philo_neck)
     $("#i_use_enhancing_buff").prop("checked", save_data.use_enhancing_buff)
     $("#i_use_experience_buff").prop("checked", save_data.use_experience_buff)
+    $("#i_use_charm").prop("checked", save_data.use_charm)
 		$("#i_enchanted_level").val(save_data.enchanted_level);
     $("#i_guzzling_level").val(save_data.guzzling_level);
     $("#i_enhancer_top_level").val(save_data.enhancer_top_level);
     $("#i_enhancer_bot_level").val(save_data.enhancer_bot_level);
     $("#i_philo_neck_level").val(save_data.philo_neck_level);
+    $("#i_charm_level").val(save_data.charm_level);
     $("#i_enhancing_buff_level").val(save_data.enhancing_buff_level);
     $("#i_experience_buff_level").val(save_data.experience_buff_level);
     $("#i_hide_junk").prop("checked", save_data.hide_junk);
@@ -874,6 +887,12 @@ function init_user_data() {
   // Initialize favorites UI
   updateBookmarkUI();
   renderFavoritesBar();
+
+  // Initialize charm selected button styling
+  $("#btn_charm_" + save_data.charm_tier).attr("class", "btn_icon_selected charm_btn");
+  // Initialize charm grid visibility
+  if(save_data.use_charm) { $("#charm_grid_row").css("display", "table-row"); }
+  else { $("#charm_grid_row").css("display", "none"); }
 }
 
 function enhancer_selection(element)
@@ -882,6 +901,17 @@ function enhancer_selection(element)
   save_data.selected_enhancer = element.id;
   element.className = 'btn_icon_selected';
 
+  update_values();
+}
+
+function charm_selection(element)
+{
+  $(".charm_btn").attr("class", "btn_icon charm_btn");
+  element.className = 'btn_icon_selected charm_btn';
+  const id = element.id;
+  // ids: btn_charm_trainee/basic/advanced/expert/master/grandmaster
+  const tier = id.replace("btn_charm_", "");
+  save_data.charm_tier = tier;
   update_values();
 }
 
@@ -981,6 +1011,17 @@ $(document).ready(function() {
     save_data.use_experience_buff = $("#i_use_experience_buff").prop('checked')
     update_values()
   })
+  $("#i_use_charm").on("input", function() {
+    save_data.use_charm = $("#i_use_charm").prop('checked')
+    if(save_data.use_charm) { $("#charm_grid_row").css("display", "table-row"); }
+    else { $("#charm_grid_row").css("display", "none"); }
+    update_values()
+  })
+  $("#i_charm_level").on("input", function() {
+    save_data.charm_level = Number($("#i_charm_level").val());
+    update_values()
+  })
+  // charm tier selection via buttons; initialized in init_user_data
   $("#i_hide_junk").on("input", function() {
     save_data.hide_junk = $("#i_hide_junk").prop('checked');
     filter();
