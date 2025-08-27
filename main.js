@@ -603,6 +603,50 @@ function sim_enhance(save_data, sim_data) {
   }
 }
 
+// Favorites (Bookmarks)
+function ensureFavoritesInit() {
+  if(save_data.favorites == undefined) { save_data.favorites = []; }
+}
+
+function isFavorite(hrid) {
+  ensureFavoritesInit();
+  return save_data.favorites.indexOf(hrid) !== -1;
+}
+
+function updateBookmarkUI() {
+  ensureFavoritesInit();
+  const btn = $("#bookmark_btn");
+  if(isFavorite(save_data.selected_item)) {
+    btn.addClass("active");
+    btn.attr("title", "Remove bookmark");
+  } else {
+    btn.removeClass("active");
+    btn.attr("title", "Bookmark item");
+  }
+}
+
+function renderFavoritesBar() {
+  ensureFavoritesInit();
+  const bar = $("#favorites_bar");
+  if(bar.length == 0) { return; }
+  bar.empty();
+  save_data.favorites.forEach(function(hrid) {
+    const sym = hrid.substring(7);
+    const btn = $('<button class="favorite_item_btn" data-hrid="'+hrid+'"><svg><use xlink:href="#'+sym+'"></use></svg></button>');
+    bar.append(btn);
+  });
+}
+
+function toggleFavorite(hrid) {
+  ensureFavoritesInit();
+  const idx = save_data.favorites.indexOf(hrid);
+  if(idx === -1) { save_data.favorites.push(hrid); }
+  else { save_data.favorites.splice(idx, 1); }
+  localStorage.setItem("Enhancelator", JSON.stringify(save_data));
+  updateBookmarkUI();
+  renderFavoritesBar();
+}
+
 function change_item(value, key) {
 	reset()
   save_data.selected_item = key;
@@ -709,6 +753,8 @@ function change_item(value, key) {
 	  $("#"+key+"_list").css("display", "flex")
 	});
 	update_values();
+	updateBookmarkUI();
+	renderFavoritesBar();
 }
 
 function filter() {
@@ -775,6 +821,7 @@ function init_user_data() {
     if(save_data.emu_time == undefined) save_data.emu_time = 32768;
     if(save_data.emu_w_aux == undefined) save_data.emu_w_aux = false;
     if(save_data.emu_money == undefined) save_data.emu_money = 0;
+    if(save_data.favorites == undefined) save_data.favorites = [];
 
     // update the UI with the saved values
 		$("#i_enhancing_level").val(save_data.enhancing_level);
@@ -823,6 +870,10 @@ function init_user_data() {
 
   if($("#" + save_data.selected_enhancer) == null) { save_data.selected_enhancer = "btn_holy_enhancer"; }
   $("#" + save_data.selected_enhancer).attr("class", "btn_icon_selected");
+
+  // Initialize favorites UI
+  updateBookmarkUI();
+  renderFavoritesBar();
 }
 
 function enhancer_selection(element)
@@ -944,6 +995,21 @@ $(document).ready(function() {
   $("#i_emu_w_aux").on("input", function() {
     save_data.emu_w_aux = $("#i_emu_w_aux").prop('checked');
     update_values(false);
+  });
+
+  // Bookmark button
+  $("#bookmark_btn").on("click", function(e) {
+    e.stopPropagation();
+    toggleFavorite(save_data.selected_item);
+  });
+
+  // Favorites bar quick-select
+  $("#favorites_bar").on("click", ".favorite_item_btn", function() {
+    const hrid = $(this).attr("data-hrid");
+    if(hrid && typeof hrid === "string") {
+      change_item(hrid.substring(7), hrid);
+      update_values();
+    }
   });
 
   $("#info_btn").on("click", function () {
