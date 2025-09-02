@@ -28,7 +28,7 @@
     <div id="progress-text">0%</div>
   </div>
   <div class="by">
-		<p>Made by: dohnuts, MangoFlavor, guch8017, AyajiLin. QA: Purpenflurb</p>
+		<p>Made by: dohnuts, MangoFlavor, guch8017, AyajiLin, Trafalet. QA: Purpenflurb</p>
 		<div id="info_btn" class="info_btn btn">
 			<p>?</p>
 		</div>
@@ -175,6 +175,33 @@
             <td align="center"><input id="i_use_philo_neck" type="checkbox" class="enhancer_stats_check_box"></td>
             <td align="right"><input id="i_philo_neck_level" type="number" min="0" max="20" placeholder="0"></td>
           </tr>
+          <tr>
+            <td><p>Enhancing Charm</p></td>
+            <td align="center"><input id="i_use_charm" type="checkbox" class="enhancer_stats_check_box"></td>
+            <td align="right"><input id="i_charm_level" type="number" min="0" max="20" placeholder="0"></td>
+          </tr>
+          <tr id="charm_grid_row" style="display: none;">
+            <td colspan="3">
+              <button id="btn_charm_trainee" class="btn_icon charm_btn" onclick="charm_selection(this)" title="Trainee Enhancing Charm">
+                <svg><use xlink:href="#trainee_enhancing_charm"></use></svg>
+              </button>
+              <button id="btn_charm_basic" class="btn_icon charm_btn" onclick="charm_selection(this)" title="Basic Enhancing Charm">
+                <svg><use xlink:href="#basic_enhancing_charm"></use></svg>
+              </button>
+              <button id="btn_charm_advanced" class="btn_icon charm_btn" onclick="charm_selection(this)" title="Advanced Enhancing Charm">
+                <svg><use xlink:href="#advanced_enhancing_charm"></use></svg>
+              </button>
+              <button id="btn_charm_expert" class="btn_icon charm_btn" onclick="charm_selection(this)" title="Expert Enhancing Charm">
+                <svg><use xlink:href="#expert_enhancing_charm"></use></svg>
+              </button>
+              <button id="btn_charm_master" class="btn_icon charm_btn" onclick="charm_selection(this)" title="Master Enhancing Charm">
+                <svg><use xlink:href="#master_enhancing_charm"></use></svg>
+              </button>
+              <button id="btn_charm_grandmaster" class="btn_icon charm_btn" onclick="charm_selection(this)" title="Grandmaster Enhancing Charm">
+                <svg><use xlink:href="#grandmaster_enhancing_charm"></use></svg>
+              </button>
+            </td>
+          </tr>
            <tr><td colspan="3"><div class="top_divider"></div></td></tr>
           <tr>
             <td><p>Enhancing buff</p></td>
@@ -242,10 +269,14 @@
           </tr>
         </table>
       </div>
-      <div id="item_slot" class="item_slot">
-        <div class="item_slot_icon">
-          <svg><use xlink:href="#"></use></svg>
+      <div class="item_slot_wrapper">
+        <div id="item_slot" class="item_slot">
+          <div class="item_slot_icon">
+            <svg><use xlink:href="#"></use></svg>
+          </div>
+          <button id="bookmark_btn" class="bookmark_btn" title="Bookmark item">★</button>
         </div>
+        <div id="favorites_bar" class="favorites_bar"></div>
       </div>
       <div id="item_stats" class="item_stats">
         <div id="material_stats">
