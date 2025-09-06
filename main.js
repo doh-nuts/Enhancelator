@@ -702,7 +702,9 @@ function change_item(value, key) {
   sim_data.mat_1 = sim_data.mat_2 = sim_data.mat_3 = sim_data.mat_4 = sim_data.mat_5 = 0;
   sim_data.prc_1 = sim_data.prc_2 = sim_data.prc_3 = sim_data.prc_4 = sim_data.prc_5 = 0;
 
+  console.log(enhancable_items, key);
   const item = enhancable_items.find((a) => a.hrid == key);
+  console.log(item);
 	for(i = 0; i < item.enhancementCosts.length; i++) {
 		elm = item.enhancementCosts[i]
 		if(elm.itemHrid == "/items/coin") {
@@ -733,19 +735,24 @@ function change_item(value, key) {
   let protect_item_hrids = item.protectionItemHrids == null ? [item.hrid] : [item.hrid].concat(item.protectionItemHrids);
 
   // base item + protect options
+  let base_price = 0;
+  let protect_index = 0;
   protect_item_hrids.forEach((protection_hrid, i) =>
   {
-    sim_data["protect_" + (i + 2) + "_hrid"] = protection_hrid;
-
     const this_cost = get_full_item_price(protection_hrid);
     if(i == 0) { base_price = this_cost; }
+    if(protection_hrid.includes("_refined")) return;
+
+    sim_data["protect_" + (protect_index + 2) + "_hrid"] = protection_hrid;
+
     if(this_cost < min_cost)
     {
       min_cost = this_cost;
-      sim_data.protect_element_id = "#prot_" + (i+2) + "_icon";
+      sim_data.protect_element_id = "#prot_" + (protect_index+2) + "_icon";
     }
-    $("#prot_" + (i+2) + "_icon").css("display", "inline-block");
-    $("#prot_" + (i+2) + "_icon > svg > use").attr("xlink:href", "#"+protection_hrid.substring(7));
+    $("#prot_" + (protect_index+2) + "_icon").css("display", "inline-block");
+    $("#prot_" + (protect_index+2) + "_icon > svg > use").attr("xlink:href", "#"+protection_hrid.substring(7));
+    protect_index++;
   });
   
   $("#i_protect_price").attr("placeholder", min_cost);
@@ -803,6 +810,14 @@ function filter() {
         $("#"+key+"_list").css("display", "none")
     })
   }
+  if(save_data.hide_refined)
+  {
+    enhancable_items.forEach(function(item) {
+      key = item.hrid.substring(7);
+      if(key.includes("_refined"))
+        $("#"+key+"_list").css("display", "none")
+    })
+  }
 }
 
 function init_user_data() {
@@ -826,6 +841,7 @@ function init_user_data() {
     if(save_data.observatory_level == undefined && save_data.laboratory_level != undefined) save_data.observatory_level = save_data.laboratory_level;
     if(save_data.hide_junk == undefined) save_data.hide_junk = false;
     if(save_data.hide_charms == undefined) save_data.hide_charms = false;
+    if(save_data.hide_refined == undefined) save_data.hide_refined = false;
     if(save_data.emu_time == undefined) save_data.emu_time = 32768;
     if(save_data.emu_w_aux == undefined) save_data.emu_w_aux = false;
     if(save_data.emu_money == undefined) save_data.emu_money = 0;
@@ -856,6 +872,7 @@ function init_user_data() {
     $("#i_experience_buff_level").val(save_data.experience_buff_level);
     $("#i_hide_junk").prop("checked", save_data.hide_junk);
     $("#i_hide_charms").prop("checked", save_data.hide_charms);
+    $("#i_hide_refined").prop("checked", save_data.hide_refined);
 
     if(save_data.tea_enhancing)       { $("#tea_enhancing").attr("class", "btn_icon_selected"); }
     if(save_data.tea_super_enhancing) { $("#tea_super_enhancing").attr("class", "btn_icon_selected"); }
@@ -964,7 +981,7 @@ $(document).ready(function() {
 
 	//generte items list
   enhancable_items = Object.entries(game_data.itemDetailMap).reduce((acc, cur) => {
-    if(cur[1].enhancementCosts != null && !cur[1].name.includes("(R)")) { acc.push(cur[1]); }
+    if(cur[1].enhancementCosts != null) { acc.push(cur[1]); }
     return acc;
   }, []).sort((a, b) => a.sortIndex - b.sortIndex);
 
@@ -1029,6 +1046,11 @@ $(document).ready(function() {
   });
   $("#i_hide_charms").on("input", function() {
     save_data.hide_charms = $("#i_hide_charms").prop('checked');
+    filter();
+    localStorage.setItem("Enhancelator", JSON.stringify(save_data));
+  });
+  $("#i_hide_refined").on("input", function() {
+    save_data.hide_refined = $("#i_hide_refined").prop('checked');
     filter();
     localStorage.setItem("Enhancelator", JSON.stringify(save_data));
   });
