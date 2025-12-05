@@ -399,10 +399,44 @@
             <th class="results_header_cells" title="(Mat Cost + Base Item + Time * Hourly Rate) * (1 + % Rate)">Total Cost</th>
           </tr>
         </thead>
-        <tbody id="results_table_body" style="display: table-header-group">
-        </tbody>
+        <tbody id="results_table_body" style="display: table-header-group"></tbody>
       </table>
 	  </div>
+    <div class="result">
+      <table id="mirrorAt" class="results_table">
+        <caption>Philosopher's Mirror</caption>
+        <tr>
+          <th class="results_header_cells"></th>
+          <th class="results_header_cells">Num</th>
+          <th class="results_header_cells">Cost Each</th>
+          <th class="results_header_cells">Total Cost</th>
+        </tr>
+        <tr>
+          <th id="header_n_minus_one" class="results_header_cells">n-1</th>
+          <td id="data_n_minus_one_count" class="results_header_cells" style="text-align: right;">999</td>
+          <td id="data_n_minus_one_cost_each" class="results_header_cells" style="text-align: right;">1,000,000</td>
+          <td id="data_n_minus_one_cost_total" class="results_header_cells" style="text-align: right;">999,000,000</td>
+        </tr>
+        <tr>
+          <th id="header_n" class="results_header_cells">n</th>
+          <td id="data_n_count" class="results_header_cells" style="text-align: right;">444</td>
+          <td id="data_n_cost_each" class="results_header_cells" style="text-align: right;">2,000,000</td>
+          <td id="data_n_cost_total" class="results_header_cells" style="text-align: right;">888,000,000</td>
+        </tr>
+        <tr>
+          <th class="results_header_cells">Mirrors</th>
+          <td id="data_mirror_count" class="results_header_cells" style="text-align: right;">12</td>
+          <td id="data_mirror_cost_each" class="results_header_cells" style="text-align: right;">12,000,000</td>
+          <td id="data_mirror_cost_total" class="results_header_cells" style="text-align: right;">144,000,000</td>
+        </tr>
+        <tr>
+          <th class="results_header_cells">Total</th>
+          <td class="results_header_cells"></td>
+          <td class="results_header_cells"></td>
+          <td id="data_mirror_cost_grand_total" class="results_header_cells" style="text-align: right;">1,400,000,000</td>
+        </tr>
+      </table>
+    </div>
     <div id="sim_wrapper">
       <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
         <div style="display: flex; align-items: center; justify-content: center;">

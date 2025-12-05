@@ -209,7 +209,7 @@ function get_full_item_price(hrid) {
   }
 
   // find action to make this
-  if(game_data.itemDetailMap[hrid].categoryHrid == "/item_categories/equipment")
+  if(game_data.itemDetailMap[hrid].categoryHrid == "/item_categories/equipment" || hrid == "/items/philosophers_mirror")
   {
     const action = Object.values(game_data.actionDetailMap).find((a) => a.function == "/action_functions/production" && a.outputItems[0].itemHrid == hrid);
     is_base_item = (action == null);
@@ -365,7 +365,7 @@ function reset_sim_results() {
   while(tbodyRef.rows.length > 0) { tbodyRef.deleteRow(0); }
 }
 
-//changing any value will change avg, so it must be reseted
+//changing any value will change avg, so it must be reset
 function reset_results() {
 	$("#used_proto_cell").css("display", "none")
 	for(i = 1; i <=5; i++) {
@@ -376,30 +376,33 @@ function reset_results() {
   while(tbodyRef.rows.length > 0) { tbodyRef.deleteRow(0); }
   reset_sim_results();
 
+  const save_stop_at = save_data.stop_at;
   const protect_levels = [...Array(save_data.stop_at - 1).keys()].map((x, i) => i + 2);
-  all_results = protect_levels.map((a) => { sim_data.protect_at = a; return Enhancelate(save_data, sim_data); });
+  all_results = protect_levels.map((target) => { return protect_levels.map((a) => { save_data.stop_at = target; sim_data.protect_at = a; return Enhancelate(save_data, sim_data); }) });
+  save_data.stop_at = save_stop_at;
 
   const base_price = ($("#i_base_price").val() == "") ? Number($("#i_base_price").attr("placeholder")) : Number($("#i_base_price").val());
 
-  all_results = all_results.map((a) => {
-    a.mat_cost = 
-      sim_data.mat_1 * a.actions * sim_data.prc_1 +
-      sim_data.mat_2 * a.actions * sim_data.prc_2 +
-      sim_data.mat_3 * a.actions * sim_data.prc_3 +
-      sim_data.mat_4 * a.actions * sim_data.prc_4 +
-      sim_data.mat_5 * a.actions * sim_data.prc_5 +
-      sim_data.protect_price * a.protect_count +
-      sim_data.coins * a.actions;
-    a.ttl_cost = (base_price + a.mat_cost + save_data.hourly_rate * sim_data.attempt_time * a.actions / 3600) * (save_data.percent_rate / 100.0 + 1.0);
-    return a;
+  all_results.forEach((targetItem, targetIndex, targets) => {
+    targets[targetIndex].forEach((protectItem, protectIndex, protects) => {
+      targets[targetIndex][protectIndex].mat_cost = 
+        sim_data.mat_1 * protectItem.actions * sim_data.prc_1 +
+        sim_data.mat_2 * protectItem.actions * sim_data.prc_2 +
+        sim_data.mat_3 * protectItem.actions * sim_data.prc_3 +
+        sim_data.mat_4 * protectItem.actions * sim_data.prc_4 +
+        sim_data.mat_5 * protectItem.actions * sim_data.prc_5 +
+        sim_data.protect_price * protectItem.protect_count +
+        sim_data.coins * protectItem.actions;
+      targets[targetIndex][protectIndex].ttl_cost = (base_price + protectItem.mat_cost + save_data.hourly_rate * sim_data.attempt_time * protectItem.actions / 3600) * (save_data.percent_rate / 100.0 + 1.0);
+    });
   });
   
-  const min_mat_cost = all_results.reduce((min, elm) => elm.mat_cost < min ? elm.mat_cost : min, 999999999999999);
-  const min_ttl_cost = all_results.reduce((min, elm) => elm.ttl_cost < min ? elm.ttl_cost : min, 999999999999999);
+  const min_mat_cost = all_results[all_results.length - 1].reduce((min, elm) => elm.mat_cost < min ? elm.mat_cost : min, Number.MAX_VALUE);
+  const min_ttl_cost = all_results[all_results.length - 1].reduce((min, elm) => elm.ttl_cost < min ? elm.ttl_cost : min, Number.MAX_VALUE);
 
   for(let protect_at = 2; protect_at <= save_data.stop_at; protect_at++)
   {
-    result = all_results[protect_at - 2];
+    result = all_results[all_results.length - 1][protect_at - 2];
     
     var newRow = tbodyRef.insertRow();
     if(result.mat_cost == min_mat_cost) { newRow.style.backgroundColor = "#223355"; }
@@ -438,6 +441,73 @@ function reset_results() {
     AddNumberCell(result.protect_count, 2);
     AddNumberCell(result.mat_cost);
     AddNumberCell(result.ttl_cost);
+  }
+
+  // Philosopher's Mirror
+  var min_mirror_cost = Number.MAX_VALUE;
+  var target_costs = new Array(save_data.stop_at);
+  const mirror_cost = get_full_item_price("/items/philosophers_mirror");
+
+  all_results.forEach((targetItem, targetIndex, targets) => {
+    const min_ttl_cost = targetItem.reduce((min, elm) => elm.ttl_cost < min ? elm.ttl_cost : min, Number.MAX_VALUE);
+    target_costs[targetIndex] = min_ttl_cost;
+  });
+
+  var mirror_at_index = Number.MAX_VALUE;
+  target_costs.forEach((target_cost, targetCostIndex, targetCosts) => {
+    if(targetCostIndex < 2) return;
+
+    const mirrored_cost = targetCosts[targetCostIndex - 2] + targetCosts[targetCostIndex - 1] + mirror_cost;
+    if(mirrored_cost < target_cost)
+    {
+      if(mirror_at_index > targetCostIndex) mirror_at_index = targetCostIndex;
+      targetCosts[targetCostIndex] = mirrored_cost;
+    }
+  });
+
+  const mirror_good = mirror_at_index < Number.MAX_VALUE;
+  $("#mirrorAt").css("display", mirror_good ? "" : "none");
+  if(mirror_good)
+  {
+    mirror_at = mirror_at_index + 2;
+    function fib(n)
+    {
+      if(n == 0 || n == 1) { return 1; }
+      return fib(n - 1) + fib(n - 2);
+    }
+    function mirror_fib(n)
+    {
+      if(n == 0) { return 1; }
+      if(n == 1) { return 2; }
+      return mirror_fib(n - 1) + mirror_fib(n - 2) + 1;
+    }
+    const num_lower_fodder = fib(save_data.stop_at - mirror_at);
+    const num_upper_fodder = fib(save_data.stop_at - mirror_at + 1);
+    const cost_lower_fodder = target_costs[mirror_at_index - 2];
+    const cost_upper_fodder = target_costs[mirror_at_index - 1];
+    const num_mirrors = mirror_fib(save_data.stop_at - mirror_at);
+    
+    function cost_to_string(num)
+    {
+      const options = {minimumFractionDigits: 0, maximumFractionDigits: 0};
+      return Number(Number.parseFloat(num)).toLocaleString(undefined, options);
+    }
+
+    $("#header_n_minus_one").text(`+${mirror_at - 2}`);
+    $("#data_n_minus_one_count").text(`${cost_to_string(num_lower_fodder)}`);
+    $("#data_n_minus_one_cost_each").text(`${cost_to_string(cost_lower_fodder)}`);
+    $("#data_n_minus_one_cost_total").text(`${cost_to_string(cost_lower_fodder * num_lower_fodder)}`);
+
+    $("#header_n").text(`+${mirror_at - 1}`);
+    $("#data_n_count").text(`${cost_to_string(num_upper_fodder)}`);
+    $("#data_n_cost_each").text(`${cost_to_string(cost_upper_fodder)}`);
+    $("#data_n_cost_total").text(`${cost_to_string(cost_upper_fodder * num_upper_fodder)}`);
+
+    $("#data_mirror_count").text(`${cost_to_string(num_mirrors)}`);
+    $("#data_mirror_cost_each").text(`${cost_to_string(mirror_cost)}`);
+    $("#data_mirror_cost_total").text(`${cost_to_string(mirror_cost * num_mirrors)}`);
+
+    $("#data_mirror_cost_grand_total").text(`${cost_to_string(cost_lower_fodder * num_lower_fodder + cost_upper_fodder * num_upper_fodder + mirror_cost * num_mirrors)}`);
   }
 
   // Simulation
@@ -702,9 +772,7 @@ function change_item(value, key) {
   sim_data.mat_1 = sim_data.mat_2 = sim_data.mat_3 = sim_data.mat_4 = sim_data.mat_5 = 0;
   sim_data.prc_1 = sim_data.prc_2 = sim_data.prc_3 = sim_data.prc_4 = sim_data.prc_5 = 0;
 
-  console.log(enhancable_items, key);
   const item = enhancable_items.find((a) => a.hrid == key);
-  console.log(item);
 	for(i = 0; i < item.enhancementCosts.length; i++) {
 		elm = item.enhancementCosts[i]
 		if(elm.itemHrid == "/items/coin") {
