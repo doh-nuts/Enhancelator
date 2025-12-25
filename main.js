@@ -266,11 +266,11 @@ function update_values(recalculate = true) {
   key = "/items/" + save_data.selected_enhancer.substring(4);
 	save_data.enhancer_level = Number($("#i_enhancer_level").val())
 	temp = enhancable_items.find((a) => a.hrid == key).equipmentDetail.noncombatStats.enhancingSuccess * 100 * enhance_bonus[save_data.enhancer_level]
-	enhancer_bonus = Number(temp.toFixed(2))
+	enhancer_bonus = Number(temp)
 
   // Guzzling bonus
   temp = enhancable_items.find((a) => a.hrid == "/items/guzzling_pouch").equipmentDetail.noncombatStats.drinkConcentration * 100 * enhance_bonus[save_data.guzzling_level]
-  guzzling_bonus = save_data.use_guzzling ? Number((1+temp/100).toFixed(3)) : 1;
+  guzzling_bonus = save_data.use_guzzling ? Number((1+temp/100)) : 1;
 
   //Tea speed bonus
   tea_speed_bonus = save_data.tea_enhancing ? 2*guzzling_bonus : save_data.tea_super_enhancing ? 4*guzzling_bonus : save_data.tea_ultra_enhancing ? 6*guzzling_bonus : 0;
@@ -281,8 +281,7 @@ function update_values(recalculate = true) {
 		sim_data.total_bonus = 1+(0.05*(effective_level + save_data.observatory_level - sim_data.item_level)+enhancer_bonus)/100
 	else
 		sim_data.total_bonus = (1-(0.5*(1-(effective_level) / sim_data.item_level)))+((0.05*save_data.observatory_level)+enhancer_bonus)/100
-  $("#o_success_bonus").text(((sim_data.total_bonus - 1.0) * 100).toFixed(2) + "%");
-
+  
   // Simulation
   save_data.emu_time = Number($("#i_emu_time").val());
   save_data.emu_w_aux = Boolean($("#i_emu_w_aux").prop('checked'));
